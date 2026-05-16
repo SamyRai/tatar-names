@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/SamyRai/tatar-names/schemas/aliases.schema.json",
+  "title": "Tatar Names aliases.csv row",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "alias_id",
+    "name_id",
+    "alias",
+    "script",
+    "language_tag",
+    "alias_type",
+    "method",
+    "confidence",
+    "source_id",
+    "rule_id"
+  ],
+  "properties": {
+    "alias_id": { "type": "string", "pattern": "^a_[0-9]{7}$" },
+    "name_id": { "type": "string", "pattern": "^ttn_[0-9]{6}$" },
+    "alias": { "type": "string", "minLength": 1 },
+    "script": { "type": "string", "enum": ["Cyrl", "Latn"] },
+    "language_tag": { "type": "string", "minLength": 1 },
+    "alias_type": {
+      "type": "string",
+      "enum": ["official_tt", "official_ru", "transliteration", "passport_latin", "ascii_fold", "common_variant", "typo_observed"]
+    },
+    "method": { "type": "string", "minLength": 1 },
+    "confidence": { "type": "string", "pattern": "^(0(\\.\\d+)?|1(\\.0+)?)$" },
+    "source_id": { "type": "string" },
+    "rule_id": { "type": "string" }
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "profile": "tabular-data-package",
+  "name": "tatar-names",
+  "title": "Tatar Names",
+  "licenses": [
+    {
+      "name": "CC-BY-4.0",
+      "path": "https://creativecommons.org/licenses/by/4.0/"
+    }
+  ],
+  "resources": [
+    {
+      "name": "names",
+      "path": "names.csv",
+      "format": "csv",
+      "schema": {
+        "path": "../../schemas/names.schema.json"
+      }
+    },
+    {
+      "name": "forms",
+      "path": "forms.csv",
+      "format": "csv",
+      "schema": {
+        "path": "../../schemas/forms.schema.json"
+      }
+    },
+    {
+      "name": "aliases",
+      "path": "aliases.csv",
+      "format": "csv",
+      "schema": {
+        "path": "../../schemas/aliases.schema.json"
+      }
+    }
+  ]
+}

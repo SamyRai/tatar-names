@@ -1,0 +1,8 @@
+cff-version: 1.2.0
+message: "If you use this dataset, please cite it as below."
+title: "Tatar Names"
+authors:
+  - family-names: "Mukimov"
+    given-names: "Damir"
+version: "0.1.0"
+license: "CC-BY-4.0"

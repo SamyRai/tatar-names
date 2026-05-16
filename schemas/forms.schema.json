@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/SamyRai/tatar-names/schemas/forms.schema.json",
+  "title": "Tatar Names forms.csv row",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "form_id",
+    "name_id",
+    "form",
+    "script",
+    "language_tag",
+    "profile",
+    "is_canonical",
+    "confidence",
+    "source_id",
+    "evidence_id"
+  ],
+  "properties": {
+    "form_id": { "type": "string", "pattern": "^f_[0-9]{7}$" },
+    "name_id": { "type": "string", "pattern": "^ttn_[0-9]{6}$" },
+    "form": { "type": "string", "minLength": 1 },
+    "script": { "type": "string", "enum": ["Cyrl", "Latn"] },
+    "language_tag": { "type": "string", "minLength": 1 },
+    "profile": {
+      "type": "string",
+      "enum": [
+        "ru_adaptation",
+        "tt_original",
+        "tt_cyrl_to_tt_latn_rt2013",
+        "ru_cyrl_to_latn_mvd_doc",
+        "common_variant"
+      ]
+    },
+    "is_canonical": { "type": "string", "enum": ["true", "false"] },
+    "confidence": { "type": "string", "pattern": "^(0(\\.\\d+)?|1(\\.0+)?)$" },
+    "source_id": { "type": "string", "minLength": 1 },
+    "evidence_id": { "type": "string" }
+  }
+}

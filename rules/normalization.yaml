@@ -1,0 +1,23 @@
+version: "0.1.0"
+
+safe_normalization:
+  - id: norm_001
+    description: "Normalize Unicode to NFKC"
+    operation: unicode_nfkc
+  - id: norm_002
+    description: "Lowercase"
+    operation: lowercase
+  - id: norm_003
+    description: "Normalize ё to е for lookup"
+    from: "ё"
+    to: "е"
+    reversible: false
+    level: safe
+
+dangerous_search_only:
+  - id: loose_001
+    description: "Remove soft and hard signs for candidate search only"
+    from: ["ь", "ъ", "'", "\""]
+    to: ""
+    reversible: false
+    level: candidate_generation_only

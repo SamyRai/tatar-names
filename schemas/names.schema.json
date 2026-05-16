@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/SamyRai/tatar-names/schemas/names.schema.json",
+  "title": "Tatar Names names.csv row",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "name_id",
+    "gender",
+    "canonical_tt_cyrl",
+    "canonical_ru_cyrl",
+    "canonical_tt_latn",
+    "canonical_ru_latn",
+    "source_id",
+    "source_row",
+    "status",
+    "notes"
+  ],
+  "properties": {
+    "name_id": { "type": "string", "pattern": "^ttn_[0-9]{6}$" },
+    "gender": { "type": "string", "enum": ["male", "female", "unisex", "unknown"] },
+    "canonical_tt_cyrl": { "type": "string" },
+    "canonical_ru_cyrl": { "type": "string", "minLength": 1 },
+    "canonical_tt_latn": { "type": "string" },
+    "canonical_ru_latn": { "type": "string" },
+    "source_id": { "type": "string", "minLength": 1 },
+    "source_row": { "type": "string" },
+    "status": { "type": "string", "enum": ["active", "deprecated", "disputed"] },
+    "notes": { "type": "string" }
+  }
+}

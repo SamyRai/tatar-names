@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/SamyRai/tatar-names/schemas/entities.schema.json",
+  "title": "Tatar Names source entities.csv row",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "entity_id",
+    "entity_type",
+    "gender",
+    "canonical_tt_cyrl",
+    "canonical_ru_cyrl",
+    "canonical_tt_latn",
+    "canonical_ru_latn",
+    "source_id",
+    "source_row",
+    "status",
+    "notes",
+    "is_lexical_exception"
+  ],
+  "properties": {
+    "entity_id": { "type": "string", "pattern": "^ttn_[0-9]{6}$" },
+    "entity_type": { "type": "string", "enum": ["given", "surname"] },
+    "gender": { "type": "string", "enum": ["male", "female", "unisex", "unknown"] },
+    "canonical_tt_cyrl": { "type": "string", "minLength": 1 },
+    "canonical_ru_cyrl": { "type": "string", "minLength": 1 },
+    "canonical_tt_latn": { "type": "string", "minLength": 1 },
+    "canonical_ru_latn": { "type": "string", "minLength": 1 },
+    "source_id": { "type": "string", "minLength": 1 },
+    "source_row": { "type": "string" },
+    "status": { "type": "string", "enum": ["active", "deprecated", "disputed"] },
+    "notes": { "type": "string" },
+    "is_lexical_exception": { "type": "string", "enum": ["true", "false"] }
+  }
+}

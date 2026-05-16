@@ -1,0 +1,10 @@
+version: "0.1.0"
+do_not_merge:
+  - left: "Ильмир"
+    right: "Эльмир"
+    reason: "Different initial vowel; both valid canonical names"
+    severity: hard
+  - left: "Олеся"
+    right: "Алеся"
+    reason: "Different canonical names despite edit distance 1"
+    severity: hard

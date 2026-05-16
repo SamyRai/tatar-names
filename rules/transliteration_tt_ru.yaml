@@ -1,0 +1,9 @@
+version: "0.1.0"
+description: "Tatar-specific Cyrillic to Russian Cyrillic fallback map for candidate generation."
+map:
+  ә: а
+  ө: о
+  ү: у
+  җ: ж
+  ң: н
+  һ: х

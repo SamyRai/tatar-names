@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Source attribution and licensing
+    url: https://github.com/SamyRai/tatar-names/blob/main/NOTICE
+    about: Review attribution and licensing notes before opening a licensing issue.

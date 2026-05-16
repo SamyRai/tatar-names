@@ -1,0 +1,14 @@
+This dataset includes derived structured data from:
+
+"Татарско-русский словарь личных имен, отчеств и фамилий"
+Управление ЗАГС Кабинета Министров Республики Татарстан
+https://zags.tatarstan.ru/rus/tatarsko-russkiy-slovar-lichnih-imen-otchestv-i.htm
+
+The source page states that site materials are licensed under Creative Commons Attribution 4.0 International.
+
+Changes made:
+- Normalized into stable CSV tables.
+- Added stable IDs.
+- Added generated forms, compatibility aliases, and confusable metadata.
+
+See bibliography.bib for source IDs used in the release tables.

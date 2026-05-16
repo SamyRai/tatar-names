@@ -1,0 +1,7 @@
+cases:
+  - input: "Эльмир"
+    expected: "Эльмир"
+  - input: "Ильмир"
+    expected: "Ильмир"
+  - input: "Мухаммет"
+    expected: "Мухаммет"
