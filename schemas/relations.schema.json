@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/SamyRai/tatar-names/schemas/relations.schema.json",
+  "title": "Tatar Names relations.csv row",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "relation_id",
+    "left_kind",
+    "left_id",
+    "right_kind",
+    "right_id",
+    "relation",
+    "merge_policy",
+    "confidence",
+    "evidence_type",
+    "source_id",
+    "evidence_id",
+    "notes"
+  ],
+  "properties": {
+    "relation_id": { "type": "string", "pattern": "^rel_[0-9]{7}$" },
+    "left_kind": { "type": "string", "enum": ["name", "form"] },
+    "left_id": { "type": "string", "minLength": 1 },
+    "right_kind": { "type": "string", "enum": ["name", "form"] },
+    "right_id": { "type": "string", "minLength": 1 },
+    "relation": {
+      "type": "string",
+      "enum": [
+        "same_name_official_pair",
+        "same_name_script_variant",
+        "same_name_adapted_form",
+        "same_etymon_but_distinct",
+        "possible_variant",
+        "near_confusable_but_distinct",
+        "russified_primary_form",
+        "tatarized_form_of_non_tatar_name",
+        "review_candidate"
+      ]
+    },
+    "merge_policy": {
+      "type": "string",
+      "enum": ["auto_merge", "candidate_only", "never_merge", "review_required"]
+    },
+    "confidence": { "type": "string", "pattern": "^(0(\\.\\d+)?|1(\\.0+)?)$" },
+    "evidence_type": { "type": "string", "minLength": 1 },
+    "source_id": { "type": "string", "minLength": 1 },
+    "evidence_id": { "type": "string" },
+    "notes": { "type": "string" }
+  }
+}

@@ -12,23 +12,27 @@ tags:
   - alias-resolution
   - onomastics
 configs:
-  - config_name: names
-    data_files: data/release/names.csv
+  - config_name: identities
+    data_files: data/release/identities.csv
   - config_name: forms
     data_files: data/release/forms.csv
+  - config_name: relations
+    data_files: data/release/relations.csv
+  - config_name: review_queue
+    data_files: data/release/review_queue.csv
   - config_name: aliases
     data_files: data/release/aliases.csv
 ---
 
 # Tatar Names
 
-Open data and a small resolver toolkit for Tatar, Russian, and Latin name forms.
+Open data and a relation-aware resolver toolkit for Tatar, Russian, and Latin name identities and forms.
 
 The repository is organized around curated source tables, generated release artifacts, and a small Python SDK:
 
 - `data/source/`: authoritative lexical entities, attestations, and preserved exclusions under review.
 - `data/release/`: generated clean release CSV tables.
-- `sdks/python/src/tatar_names/`: normalization, transliteration, and alias-resolution helpers.
+- `sdks/python/src/tatar_names/`: normalization, transliteration, audit, and relation-aware resolution helpers.
 - `schemas/`: JSON Schema contracts for source and release tables.
 - `rules/`: normalization and transliteration rule tables used by the SDK.
 - `docs/`: dataset, normalization, transliteration, and limitations documentation.
@@ -41,11 +45,13 @@ The repository is organized around curated source tables, generated release arti
 
 ## Release Tables
 
-- `data/release/names.csv`: generated canonical lexical identities with stable IDs.
-- `data/release/forms.csv`: generated source-backed and unambiguous lexical spellings.
-- `data/release/aliases.csv`: generated compatibility lookup spellings from safe release forms.
+- `data/release/identities.csv`: generated canonical name identities with stable IDs and context primary forms.
+- `data/release/forms.csv`: generated concrete forms with explicit `form_role`, `identity_status`, and `merge_policy`.
+- `data/release/relations.csv`: generated name-form and name-name relations, including hard-negative confusables.
+- `data/release/review_queue.csv`: generated review backlog for weak evidence, exclusions, and uncovered confusable rules.
+- `data/release/aliases.csv`: derived compatibility lookup spellings built after relation semantics are applied.
 
-The working source of truth is the CSV source set under `data/source/`. Release tables and metadata are generated from source. Patronymics and other deterministic formations are supported through the SDK but are not stored as release entities.
+The working source of truth is the CSV source set under `data/source/`. Release tables and metadata are generated from source. Patronymics and other deterministic formations are supported through the SDK but are not stored as canonical release identities.
 
 ## Quickstart
 
@@ -69,6 +75,7 @@ transliterate.ru_to_latin("Мухаммет")
 # "Mukhammet"
 
 resolve.resolve("Эльмир")
+# {"best_match": {...}, "near_misses": [...], "relation_warnings": [...], ...}
 
 generate_patronymic(
     {

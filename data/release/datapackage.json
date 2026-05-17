@@ -10,11 +10,11 @@
   ],
   "resources": [
     {
-      "name": "names",
-      "path": "names.csv",
+      "name": "identities",
+      "path": "identities.csv",
       "format": "csv",
       "schema": {
-        "path": "../../schemas/names.schema.json"
+        "path": "../../schemas/identities.schema.json"
       }
     },
     {
@@ -23,6 +23,22 @@
       "format": "csv",
       "schema": {
         "path": "../../schemas/forms.schema.json"
+      }
+    },
+    {
+      "name": "relations",
+      "path": "relations.csv",
+      "format": "csv",
+      "schema": {
+        "path": "../../schemas/relations.schema.json"
+      }
+    },
+    {
+      "name": "review_queue",
+      "path": "review_queue.csv",
+      "format": "csv",
+      "schema": {
+        "path": "../../schemas/review_queue.schema.json"
       }
     },
     {
