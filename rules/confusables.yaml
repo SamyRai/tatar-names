@@ -8,3 +8,19 @@ do_not_merge:
     right: "Алеся"
     reason: "Different canonical names despite edit distance 1"
     severity: hard
+  - left: "Илнар"
+    right: "Эльнар"
+    reason: "Similar structure but distinct independent names"
+    severity: hard
+  - left: "Алия"
+    right: "Галия"
+    reason: "Different canonical names with dangerous fuzzy overlap"
+    severity: hard
+  - left: "Рамиль"
+    right: "Рамил"
+    reason: "Soft-sign variation is not proof of the same identity"
+    severity: hard
+  - left: "Дамир"
+    right: "Димир"
+    reason: "Single-vowel change remains merge-unsafe"
+    severity: hard

@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/SamyRai/tatar-names/schemas/review_queue.schema.json",
+  "title": "Tatar Names review_queue.csv row",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "review_id",
+    "subject_kind",
+    "subject_id",
+    "queue_reason",
+    "suggested_relation",
+    "source_id",
+    "evidence_id",
+    "notes"
+  ],
+  "properties": {
+    "review_id": { "type": "string", "pattern": "^rq_[0-9]{7}$" },
+    "subject_kind": { "type": "string", "enum": ["excluded_entity", "form", "relation", "rule"] },
+    "subject_id": { "type": "string", "minLength": 1 },
+    "queue_reason": { "type": "string", "minLength": 1 },
+    "suggested_relation": {
+      "type": "string",
+      "enum": [
+        "",
+        "same_name_official_pair",
+        "same_name_script_variant",
+        "same_name_adapted_form",
+        "same_etymon_but_distinct",
+        "possible_variant",
+        "near_confusable_but_distinct",
+        "russified_primary_form",
+        "tatarized_form_of_non_tatar_name",
+        "review_candidate"
+      ]
+    },
+    "source_id": { "type": "string", "minLength": 1 },
+    "evidence_id": { "type": "string" },
+    "notes": { "type": "string" }
+  }
+}

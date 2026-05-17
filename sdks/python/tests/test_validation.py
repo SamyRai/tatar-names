@@ -3,7 +3,7 @@ import shutil
 from pathlib import Path
 
 from tatar_names.cli.validate import validate_project
-from tatar_names.pipeline import validate_release, validate_source
+from tatar_names.pipeline import build_release_rows, validate_release, validate_source
 
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -69,9 +69,28 @@ def test_validation_rejects_ambiguous_release_form(tmp_path: Path) -> None:
     assert any("exact release form" in error for error in validate_release(release_dir))
 
 
-def test_source_directory_exists_and_relations_release_is_removed() -> None:
+def test_validation_rejects_cross_type_source_alias_candidate(tmp_path: Path) -> None:
+    source_dir, _ = copy_dataset(tmp_path)
+    entities = read_csv(source_dir / "entities.csv")
+    attestations = read_csv(source_dir / "attestations.csv")
+    given = next(row for row in entities if row["entity_type"] == "given")
+    surname = next(row for row in entities if row["entity_type"] == "surname")
+    target = next(row for row in attestations if row["entity_id"] == surname["entity_id"] and row["is_canonical"] == "false")
+    target["form"] = "SharedAlias"
+    target["script"] = "Latn"
+    target["language_tag"] = "ru-Latn"
+    other = next(row for row in attestations if row["entity_id"] == given["entity_id"] and row["is_canonical"] == "false")
+    other["form"] = "SharedAlias"
+    other["script"] = "Latn"
+    other["language_tag"] = "ru-Latn"
+    rewrite_csv(source_dir / "attestations.csv", attestations)
+
+    assert any("spans multiple entity types" in error for error in validate_source(source_dir))
+
+
+def test_source_directory_exists_and_relations_release_exists() -> None:
     assert (ROOT / "data" / "source").exists()
-    assert not (ROOT / "data" / "release" / "relations.csv").exists()
+    assert (ROOT / "data" / "release" / "relations.csv").exists()
 
 
 def test_bibliography_exists_and_covers_dataset_sources() -> None:
@@ -81,9 +100,58 @@ def test_bibliography_exists_and_covers_dataset_sources() -> None:
     entities = read_csv(source / "entities.csv")
     attestations = read_csv(source / "attestations.csv")
     excluded = read_csv(source / "excluded_entities.csv")
-    names = read_csv(release / "names.csv")
+    identities = read_csv(release / "identities.csv")
     forms = read_csv(release / "forms.csv")
+    relations = read_csv(release / "relations.csv")
+    review_queue = read_csv(release / "review_queue.csv")
     aliases = read_csv(release / "aliases.csv")
 
-    for source_id in {row["source_id"] for row in entities + attestations + excluded + names + forms + aliases}:
-        assert f"{{{source_id}," in bibliography
+    for source_id in {row["source_id"] for row in entities + attestations + excluded + identities + forms + relations + review_queue + aliases}:
+        assert f"{{{source_id}," in bibliography or source_id == "confusables_rule"
+
+
+def test_build_release_rows_adds_official_and_hard_negative_relations() -> None:
+    rows = build_release_rows()
+
+    guzel_forms = [row for row in rows["forms"] if row["name_id"] == "ttn_008828"]
+    assert any(row["form"] == "Гүзәл" and row["merge_policy"] == "auto_merge" for row in guzel_forms)
+    assert any(row["form"] == "Гузель" and row["merge_policy"] == "auto_merge" for row in guzel_forms)
+    assert any(
+        row["left_kind"] == "name"
+        and row["left_id"] == "ttn_008828"
+        and row["relation"] in {"same_name_official_pair", "russified_primary_form"}
+        for row in rows["relations"]
+    )
+    assert any(
+        row["relation"] == "near_confusable_but_distinct"
+        and {row["left_id"], row["right_id"]} == {"ttn_012319", "ttn_030398"}
+        for row in rows["relations"]
+    )
+
+
+def test_validation_rejects_relation_with_invalid_kind(tmp_path: Path) -> None:
+    _, release_dir = copy_dataset(tmp_path)
+    rows = read_csv(release_dir / "relations.csv")
+    rows[0]["left_kind"] = "alias"
+    rewrite_csv(release_dir / "relations.csv", rows)
+
+    assert any("invalid left_kind" in error for error in validate_release(release_dir))
+
+
+def test_validation_rejects_relation_missing_merge_policy(tmp_path: Path) -> None:
+    _, release_dir = copy_dataset(tmp_path)
+    rows = read_csv(release_dir / "relations.csv")
+    rows[0]["merge_policy"] = ""
+    rewrite_csv(release_dir / "relations.csv", rows)
+
+    assert any("invalid merge_policy" in error for error in validate_release(release_dir))
+
+
+def test_validation_rejects_auto_merge_on_hard_negative(tmp_path: Path) -> None:
+    _, release_dir = copy_dataset(tmp_path)
+    rows = read_csv(release_dir / "relations.csv")
+    target = next(row for row in rows if row["relation"] == "near_confusable_but_distinct")
+    target["merge_policy"] = "auto_merge"
+    rewrite_csv(release_dir / "relations.csv", rows)
+
+    assert any("cannot auto_merge near_confusable_but_distinct" in error for error in validate_release(release_dir))

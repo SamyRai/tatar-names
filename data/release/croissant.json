@@ -6,14 +6,26 @@
   "distribution": [
     {
       "@type": "DataDownload",
-      "name": "names",
-      "contentUrl": "data/release/names.csv",
+      "name": "identities",
+      "contentUrl": "data/release/identities.csv",
       "encodingFormat": "text/csv"
     },
     {
       "@type": "DataDownload",
       "name": "forms",
       "contentUrl": "data/release/forms.csv",
+      "encodingFormat": "text/csv"
+    },
+    {
+      "@type": "DataDownload",
+      "name": "relations",
+      "contentUrl": "data/release/relations.csv",
+      "encodingFormat": "text/csv"
+    },
+    {
+      "@type": "DataDownload",
+      "name": "review_queue",
+      "contentUrl": "data/release/review_queue.csv",
       "encodingFormat": "text/csv"
     },
     {

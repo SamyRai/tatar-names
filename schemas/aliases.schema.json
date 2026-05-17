@@ -6,6 +6,7 @@
   "additionalProperties": false,
   "required": [
     "alias_id",
+    "form_id",
     "name_id",
     "alias",
     "script",
@@ -13,21 +14,27 @@
     "alias_type",
     "method",
     "confidence",
+    "merge_policy",
     "source_id",
     "rule_id"
   ],
   "properties": {
     "alias_id": { "type": "string", "pattern": "^a_[0-9]{7}$" },
+    "form_id": { "type": "string", "pattern": "^f_[0-9]{7}$" },
     "name_id": { "type": "string", "pattern": "^ttn_[0-9]{6}$" },
     "alias": { "type": "string", "minLength": 1 },
     "script": { "type": "string", "enum": ["Cyrl", "Latn"] },
     "language_tag": { "type": "string", "minLength": 1 },
     "alias_type": {
       "type": "string",
-      "enum": ["official_tt", "official_ru", "transliteration", "passport_latin", "ascii_fold", "common_variant", "typo_observed"]
+      "enum": ["official_tt", "official_ru", "transliteration", "passport_latin", "common_variant", "typo_observed"]
     },
     "method": { "type": "string", "minLength": 1 },
     "confidence": { "type": "string", "pattern": "^(0(\\.\\d+)?|1(\\.0+)?)$" },
+    "merge_policy": {
+      "type": "string",
+      "enum": ["auto_merge", "candidate_only", "never_merge", "review_required"]
+    },
     "source_id": { "type": "string" },
     "rule_id": { "type": "string" }
   }

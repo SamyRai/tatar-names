@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/SamyRai/tatar-names/schemas/identities.schema.json",
+  "title": "Tatar Names identities.csv row",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "name_id",
+    "entity_type",
+    "gender",
+    "origin_family",
+    "usage_community",
+    "canonical_tt_cyrl",
+    "canonical_ru_cyrl",
+    "canonical_tt_latn",
+    "canonical_ru_latn",
+    "primary_form_global",
+    "primary_form_tt",
+    "primary_form_ru",
+    "source_id",
+    "source_row",
+    "status",
+    "notes"
+  ],
+  "properties": {
+    "name_id": { "type": "string", "pattern": "^ttn_[0-9]{6}$" },
+    "entity_type": { "type": "string", "enum": ["given", "surname"] },
+    "gender": { "type": "string", "enum": ["male", "female", "unisex", "unknown"] },
+    "origin_family": { "type": "string", "minLength": 1 },
+    "usage_community": { "type": "string", "minLength": 1 },
+    "canonical_tt_cyrl": { "type": "string", "minLength": 1 },
+    "canonical_ru_cyrl": { "type": "string", "minLength": 1 },
+    "canonical_tt_latn": { "type": "string", "minLength": 1 },
+    "canonical_ru_latn": { "type": "string", "minLength": 1 },
+    "primary_form_global": { "type": "string", "minLength": 1 },
+    "primary_form_tt": { "type": "string", "minLength": 1 },
+    "primary_form_ru": { "type": "string", "minLength": 1 },
+    "source_id": { "type": "string", "minLength": 1 },
+    "source_row": { "type": "string" },
+    "status": { "type": "string", "enum": ["active", "deprecated", "disputed"] },
+    "notes": { "type": "string" }
+  }
+}
