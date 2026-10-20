@@ -23,6 +23,13 @@ build-backend = "uv_build"
 dev = [
     "pytest>=9.0.3",
 ]
+# Heavyweight validators kept out of the default dev install; pull them with
+# `uv sync --group metadata` (CI uses --all-groups). The command they back:
+# `uv run python -m tatar_names.metadata --validate`
+metadata = [
+    "frictionless>=5.21",
+    "mlcroissant>=1.1.1",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

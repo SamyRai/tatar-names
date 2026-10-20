@@ -814,36 +814,3 @@ def validate_release(data_dir: str | Path | None = None) -> list[str]:
             errors.append(f"normalized alias {key!r} maps to multiple name_id values: {', '.join(sorted(ids))}")
 
     return errors
-
-
-def write_metadata(release_dir: Path) -> None:
-    resources = [
-        {"name": "identities", "path": "identities.csv", "format": "csv", "schema": {"path": "../../schemas/identities.schema.json"}},
-        {"name": "forms", "path": "forms.csv", "format": "csv", "schema": {"path": "../../schemas/forms.schema.json"}},
-        {"name": "relations", "path": "relations.csv", "format": "csv", "schema": {"path": "../../schemas/relations.schema.json"}},
-        {"name": "review_queue", "path": "review_queue.csv", "format": "csv", "schema": {"path": "../../schemas/review_queue.schema.json"}},
-        {"name": "aliases", "path": "aliases.csv", "format": "csv", "schema": {"path": "../../schemas/aliases.schema.json"}},
-    ]
-    datapackage = {
-        "profile": "tabular-data-package",
-        "name": "tatar-names",
-        "title": "Tatar Names",
-        "licenses": [{"name": "CC-BY-4.0", "path": "https://creativecommons.org/licenses/by/4.0/"}],
-        "resources": resources,
-    }
-    (release_dir / "datapackage.json").write_text(json.dumps(datapackage, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-
-    croissant = {
-        "@context": "https://schema.org/",
-        "@type": "Dataset",
-        "name": "Tatar Names",
-        "license": "https://creativecommons.org/licenses/by/4.0/",
-        "distribution": [
-            {"@type": "DataDownload", "name": "identities", "contentUrl": "data/release/identities.csv", "encodingFormat": "text/csv"},
-            {"@type": "DataDownload", "name": "forms", "contentUrl": "data/release/forms.csv", "encodingFormat": "text/csv"},
-            {"@type": "DataDownload", "name": "relations", "contentUrl": "data/release/relations.csv", "encodingFormat": "text/csv"},
-            {"@type": "DataDownload", "name": "review_queue", "contentUrl": "data/release/review_queue.csv", "encodingFormat": "text/csv"},
-            {"@type": "DataDownload", "name": "aliases", "contentUrl": "data/release/aliases.csv", "encodingFormat": "text/csv"},
-        ],
-    }
-    (release_dir / "croissant.json").write_text(json.dumps(croissant, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
