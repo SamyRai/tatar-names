@@ -7,6 +7,7 @@ from pathlib import Path
 
 import pytest
 
+from tatar_names import pipeline as pipeline_module
 from tatar_names.cli import build as build_cli
 from tatar_names.pipeline import (
     _assign_relation_ids,
@@ -117,31 +118,18 @@ def test_relation_ids_survive_input_row_reordering(tmp_path: Path) -> None:
     assert forward_bytes == reversed_bytes
 
 
-def _find_colliding_canonical_keys() -> tuple[str, str]:
-    key = _relation_canonical_key(
+def _relation_key_pair() -> tuple[str, str]:
+    key_a = _relation_canonical_key(
         "name", "ttn_000001", "form", "f_0000001", "same_name_official_pair", "source_attestation"
     )
-    seen = {key: _relation_base_digest(key)}
-    counter = 0
-    while True:
-        counter += 1
-        key = _relation_canonical_key(
-            "name", f"ttn_{counter % 900000 + 100000:06d}", "form", f"f_{counter % 9000000 + 1000000:07d}",
-            "same_name_official_pair", f"source_attestation_{counter}",
-        )
-        digest = _relation_base_digest(key)
-        for existing_key, existing_digest in seen.items():
-            if existing_digest == digest:
-                return existing_key, key
-        seen[key] = digest
+    key_b = _relation_canonical_key(
+        "name", "ttn_000002", "form", "f_0000002", "same_name_official_pair", "source_attestation"
+    )
+    return key_a, key_b
 
 
-def test_assign_relation_ids_resolves_digest_collisions_deterministically() -> None:
-    key_a, key_b = _find_colliding_canonical_keys()
-    assert key_a != key_b
-    assert _relation_base_digest(key_a) == _relation_base_digest(key_b)
-
-    payload_a = {
+def _relation_payload(notes: str) -> dict[str, str]:
+    return {
         "left_kind": "name",
         "left_id": "ttn_000001",
         "right_kind": "form",
@@ -152,16 +140,39 @@ def test_assign_relation_ids_resolves_digest_collisions_deterministically() -> N
         "evidence_type": "source_attestation",
         "source_id": "src",
         "evidence_id": "ev_1",
-        "notes": "a",
+        "notes": notes,
     }
-    payload_b = dict(payload_a, notes="b")
 
-    forward = _assign_relation_ids({key_a: payload_a, key_b: payload_b})
-    backward = _assign_relation_ids({key_b: payload_b, key_a: payload_a})
+
+def test_assign_relation_ids_flags_true_digest_collisions(monkeypatch: pytest.MonkeyPatch) -> None:
+    # A genuine 12-hex collision is astronomically unlikely (~4e-5 over the
+    # current relation count), so the failure path is exercised with a stubbed
+    # digest instead of brute force - brute force would never terminate here.
+    key_a, key_b = _relation_key_pair()
+    shared_digest = "a" * 12
+    monkeypatch.setattr(
+        pipeline_module,
+        "_relation_base_digest",
+        lambda _key: shared_digest,
+    )
+
+    with pytest.raises(ValueError, match="digest collision"):
+        _assign_relation_ids({key_a: _relation_payload("a"), key_b: _relation_payload("b")})
+
+
+def test_assign_relation_ids_is_order_independent() -> None:
+    key_a, key_b = _relation_key_pair()
+    assert _relation_base_digest(key_a) != _relation_base_digest(key_b)
+
+    forward = _assign_relation_ids({key_a: _relation_payload("a"), key_b: _relation_payload("b")})
+    backward = _assign_relation_ids({key_b: _relation_payload("b"), key_a: _relation_payload("a")})
 
     forward_by_notes = {row["notes"]: row["relation_id"] for row in forward}
     backward_by_notes = {row["notes"]: row["relation_id"] for row in backward}
     assert forward_by_notes == backward_by_notes
+    assert len({row["relation_id"] for row in forward}) == 2
+    for row in forward:
+        assert RELATION_ID_PATTERN.fullmatch(row["relation_id"])
     assert len(set(forward_by_notes.values())) == 2
     for relation_id in forward_by_notes.values():
         assert RELATION_ID_PATTERN.fullmatch(relation_id)

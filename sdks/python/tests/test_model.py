@@ -133,7 +133,7 @@ def test_attestation_rejects_bad_form_kind() -> None:
 
 def test_relation_assertion_from_row() -> None:
     row = {
-        "relation_id": "rel_0000001",
+        "relation_id": "rel_0000001abcde",
         "left_kind": "name",
         "left_id": "ttn_000041",
         "right_kind": "form",
@@ -147,7 +147,7 @@ def test_relation_assertion_from_row() -> None:
         "notes": "official_ru_or_russified_primary",
     }
     relation = model.RelationAssertion.from_row(row)
-    assert relation.relation_id == "rel_0000001"
+    assert relation.relation_id == "rel_0000001abcde"
     assert relation.left_kind == "name"
     assert relation.left_id == "ttn_000041"
     assert relation.right_kind == "form"
@@ -158,7 +158,7 @@ def test_relation_assertion_from_row() -> None:
 
 def test_relation_assertion_rejects_bad_relation() -> None:
     row = {
-        "relation_id": "rel_0000001",
+        "relation_id": "rel_0000001abcde",
         "left_kind": "name",
         "left_id": "ttn_000041",
         "right_kind": "form",
