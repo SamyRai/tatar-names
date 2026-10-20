@@ -23,7 +23,7 @@ from ._contracts import (
     VALID_SCRIPTS,
     VALID_STATUSES,
 )
-from .data import default_release_dir, default_source_dir, project_root
+from .data import default_release_dir, default_source_dir, project_root, rules_path
 from .formations import detect_generated_formation, is_suspicious_repetition
 
 BAD_START_RE = re.compile(r"^[^\wА-Яа-яӘәӨөҮүҖҗҢңҺһЁё]")
@@ -111,7 +111,7 @@ def _float_str(value: str) -> float:
 
 
 def _parse_confusables(path: Path | None = None) -> list[dict[str, str]]:
-    confusables_path = path if path is not None else project_root() / "rules" / "confusables.yaml"
+    confusables_path = path if path is not None else rules_path("confusables.yaml")
     rows: list[dict[str, str]] = []
     current: dict[str, str] | None = None
     for raw_line in confusables_path.read_text(encoding="utf-8").splitlines():
@@ -200,9 +200,11 @@ def _relation_kind_for_form(form_row: dict[str, str], identity: dict[str, str]) 
     return "review_candidate"
 
 
-# relations.schema.json constrains relation_id to ^rel_[0-9]{7}$, so content ids are
-# a sha256 digest truncated into that exact 7-decimal-digit space.
-RELATION_ID_MODULUS = 10_000_000
+# relations.schema.json constrains relation_id to ^rel_[0-9a-f]{12}$. Twelve hex
+# digits keep the birthday-collision expectation over the current relation count
+# (~155k) around 4e-5, so a content-derived id can be unique by construction and
+# a genuine digest collision is loud instead of resolved silently.
+RELATION_ID_LENGTH = 12
 
 
 def _relation_canonical_key(
@@ -217,8 +219,8 @@ def _relation_canonical_key(
     return json.dumps([endpoints[0], endpoints[1], relation, evidence_type], ensure_ascii=False, separators=(",", ":"))
 
 
-def _relation_base_digest(canonical_key: str) -> int:
-    return int(hashlib.sha256(canonical_key.encode("utf-8")).hexdigest(), 16) % RELATION_ID_MODULUS
+def _relation_base_digest(canonical_key: str) -> str:
+    return hashlib.sha256(canonical_key.encode("utf-8")).hexdigest()[:RELATION_ID_LENGTH]
 
 
 def _record_relation_payload(store: dict[str, dict[str, str]], canonical_key: str, payload: dict[str, str]) -> None:
@@ -236,19 +238,24 @@ def _record_relation_payload(store: dict[str, dict[str, str]], canonical_key: st
 
 
 def _assign_relation_ids(store: dict[str, dict[str, str]]) -> list[dict[str, str]]:
-    # Distinct contents that truncate to the same 7-digit value are resolved by
-    # linear probing in canonical-key order, so ids depend only on the set of
-    # relation contents, never on insertion or row order.
-    if len(store) > RELATION_ID_MODULUS:
-        raise ValueError("relation id space exhausted: too many distinct relations")
-    assigned: list[dict[str, str]] = []
-    used: set[int] = set()
-    for canonical_key in sorted(store):
-        slot = _relation_base_digest(canonical_key)
-        while slot in used:
-            slot = (slot + 1) % RELATION_ID_MODULUS
-        used.add(slot)
-        assigned.append({"relation_id": f"rel_{slot:07d}", **store[canonical_key]})
+    # Content-derived ids: same logical relation -> same id in every build,
+    # independent of insertion or row order. Distinct contents that digest to
+    # the same id are a real collision and must fail the build loudly.
+    digests = {canonical_key: _relation_base_digest(canonical_key) for canonical_key in store}
+    by_digest: dict[str, str] = {}
+    for canonical_key, digest in digests.items():
+        other = by_digest.get(digest)
+        if other is not None:
+            raise ValueError(
+                "relation id digest collision - widen RELATION_ID_LENGTH:\n"
+                f"- {other}\n"
+                f"- {canonical_key}"
+            )
+        by_digest[digest] = canonical_key
+    assigned = [
+        {"relation_id": f"rel_{digests[canonical_key]}", **store[canonical_key]}
+        for canonical_key in sorted(store)
+    ]
     assigned.sort(key=lambda row: row["relation_id"])
     return assigned
 

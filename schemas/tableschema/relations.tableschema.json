@@ -5,7 +5,7 @@
       "type": "string",
       "constraints": {
         "required": true,
-        "pattern": "^rel_[0-9]{7}$"
+        "pattern": "^rel_[0-9a-f]{12}$"
       }
     },
     {

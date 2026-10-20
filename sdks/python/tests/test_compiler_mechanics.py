@@ -41,7 +41,7 @@ RELATION_FIELDS = [
     "evidence_id",
     "notes",
 ]
-RELATION_ID_PATTERN = re.compile(r"^rel_[0-9]{7}$")
+RELATION_ID_PATTERN = re.compile(r"^rel_[0-9a-f]{12}$")
 
 
 def make_source_dir(

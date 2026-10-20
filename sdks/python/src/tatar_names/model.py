@@ -20,7 +20,7 @@ from typing import Mapping
 NAME_ID_RE = re.compile(r"^ttn_[0-9]{6}$")
 FORM_ID_RE = re.compile(r"^f_[0-9]{7}$")
 ATTESTATION_ID_RE = re.compile(r"^at_[0-9]{7}$")
-RELATION_ID_RE = re.compile(r"^rel_[0-9]{7}$")
+RELATION_ID_RE = re.compile(r"^rel_[0-9a-f]{12}$")
 REVIEW_ID_RE = re.compile(r"^rq_[0-9]{7}$")
 CONFIDENCE_RE = re.compile(r"^(0(\.\d+)?|1(\.0+)?)$")
 
