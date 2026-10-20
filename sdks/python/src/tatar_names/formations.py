@@ -90,6 +90,35 @@ def detect_generated_formation(
     )
 
 
+def _ru_patronymic_stems(ru_cyrl: str, ru_latn: str) -> tuple[str, str]:
+    """Return the (Cyrillic, Latin) stems the patronymic suffix attaches to.
+
+    -ий bases keep a soft stem (Юрий -> Юрь-, giving Юрьевич). The surface form
+    cannot distinguish every soft stem (Дмитрий -> Дмитриевич), so -ий is treated
+    as soft throughout; that is the standard for names like Юрий, Василий,
+    Анатолий. The Latin stem drops the transliterated -ий (и/й map to i or y in
+    common schemes), which is exactly what the Cyrillic soft sign contributes
+    to the Latin form (nothing). Bases ending in other й or in ь drop that
+    letter; the map transliterates ь to nothing, so those Latin stems are
+    already aligned and only the plain-й Latin form keeps its historical i/y.
+    """
+    if ru_cyrl.endswith("ий"):
+        cyrl_stem = f"{ru_cyrl[:-2]}ь"
+        if ru_latn.endswith(("iy", "ii")):
+            latn_stem = ru_latn[:-2]
+        elif ru_latn.endswith(("i", "y")):
+            latn_stem = ru_latn[:-1]
+        else:
+            latn_stem = ru_latn
+    elif ru_cyrl.endswith(("й", "ь")):
+        cyrl_stem = ru_cyrl[:-1]
+        latn_stem = ru_latn
+    else:
+        cyrl_stem = ru_cyrl
+        latn_stem = ru_latn
+    return cyrl_stem, latn_stem
+
+
 def generate_patronymic(base: Mapping[str, str], gender: str) -> dict[str, str]:
     suffixes = PATRONYMIC_SUFFIXES.get(gender)
     if suffixes is None:
@@ -98,7 +127,7 @@ def generate_patronymic(base: Mapping[str, str], gender: str) -> dict[str, str]:
     ru_cyrl = base["canonical_ru_cyrl"].strip()
     tt_latn = base["canonical_tt_latn"].strip()
     ru_latn = base["canonical_ru_latn"].strip()
-    ru_cyrl_base = ru_cyrl[:-1] if ru_cyrl.endswith(("й", "ь")) else ru_cyrl
+    ru_cyrl_stem, ru_latn_stem = _ru_patronymic_stems(ru_cyrl, ru_latn)
     if ru_cyrl.endswith(("й", "ь", "и", "я", "е", "ё")):
         ru_suffix_cyrl = "евич" if gender == "male" else "евна"
         ru_suffix_latn = "evich" if gender == "male" else "evna"
@@ -107,7 +136,7 @@ def generate_patronymic(base: Mapping[str, str], gender: str) -> dict[str, str]:
         ru_suffix_latn = "ovich" if gender == "male" else "ovna"
     return {
         "canonical_tt_cyrl": f"{tt_cyrl}{suffixes['tt_cyrl']}",
-        "canonical_ru_cyrl": f"{ru_cyrl_base}{ru_suffix_cyrl}",
+        "canonical_ru_cyrl": f"{ru_cyrl_stem}{ru_suffix_cyrl}",
         "canonical_tt_latn": f"{tt_latn}{suffixes['tt_latn']}",
-        "canonical_ru_latn": f"{ru_latn}{ru_suffix_latn}",
+        "canonical_ru_latn": f"{ru_latn_stem}{ru_suffix_latn}",
     }

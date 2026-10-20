@@ -5,6 +5,8 @@ from functools import lru_cache
 from .data import project_root
 
 PROFILE_FILES = {
+    # "rt2013" is a historical id: this map is a lossy ASCII search fold
+    # (ә/а, ө/о, ү/у, ң/н collapse onto one letter), not the RT-2013 legal annex.
     "tt_cyrl_to_tt_latn_rt2013": "transliteration_tt_latn.yaml",
     "ru_cyrl_to_latn_mvd_doc": "transliteration_ru_latn_passport.yaml",
 }
@@ -42,10 +44,17 @@ def profile_map(profile: str) -> dict[str, str]:
 
 def _apply_map(value: str, mapping: dict[str, str]) -> str:
     parts: list[str] = []
-    for char in value:
+    for index, char in enumerate(value):
         lower = char.lower()
         mapped = mapping.get(lower, char)
-        parts.append(mapped.capitalize() if char.isupper() and mapped else mapped)
+        if char.isupper() and mapped:
+            # Casing is run-aware: mid-run mappings go full uppercase so
+            # multi-letter maps stay TSAR-shaped; the run's last mapping
+            # capitalizes as before.
+            next_is_upper = index + 1 < len(value) and value[index + 1].isupper()
+            parts.append(mapped.upper() if next_is_upper else mapped.capitalize())
+        else:
+            parts.append(mapped)
     return "".join(parts)
 
 
