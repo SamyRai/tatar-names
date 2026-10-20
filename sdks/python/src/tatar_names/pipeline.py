@@ -8,44 +8,24 @@ from itertools import combinations
 from pathlib import Path
 
 from . import normalize
+from ._contracts import (
+    VALID_ENTITY_TYPES,
+    VALID_FORM_KINDS,
+    VALID_FORM_PROFILES,
+    VALID_FORM_ROLES,
+    VALID_GENDERS,
+    VALID_IDENTITY_STATUSES,
+    VALID_LINK_KINDS,
+    VALID_MERGE_POLICIES,
+    VALID_RELATIONS,
+    VALID_REVIEW_SUBJECT_KINDS,
+    VALID_SCRIPTS,
+    VALID_STATUSES,
+)
 from .data import default_release_dir, default_source_dir, project_root
 from .formations import detect_generated_formation, is_suspicious_repetition
 
 BAD_START_RE = re.compile(r"^[^\wА-Яа-яӘәӨөҮүҖҗҢңҺһЁё]")
-VALID_GENDERS = {"male", "female", "unisex", "unknown"}
-VALID_ENTITY_TYPES = {"given", "surname"}
-VALID_STATUSES = {"active", "deprecated", "disputed"}
-VALID_SCRIPTS = {"Cyrl", "Latn"}
-VALID_FORM_KINDS = {"canonical", "observed_variant", "transliterated", "normalized_source"}
-VALID_FORM_PROFILES = {
-    "ru_adaptation",
-    "tt_original",
-    "tt_cyrl_to_tt_latn_rt2013",
-    "ru_cyrl_to_latn_mvd_doc",
-    "common_variant",
-}
-VALID_FORM_ROLES = {
-    "official_tt",
-    "official_ru_or_russified_primary",
-    "tt_latin_transliteration",
-    "passport_latin",
-    "common_observed",
-}
-VALID_IDENTITY_STATUSES = {"canonical", "variant", "alias"}
-VALID_MERGE_POLICIES = {"auto_merge", "candidate_only", "never_merge", "review_required"}
-VALID_RELATIONS = {
-    "same_name_official_pair",
-    "same_name_script_variant",
-    "same_name_adapted_form",
-    "same_etymon_but_distinct",
-    "possible_variant",
-    "near_confusable_but_distinct",
-    "russified_primary_form",
-    "tatarized_form_of_non_tatar_name",
-    "review_candidate",
-}
-VALID_LINK_KINDS = {"name", "form"}
-VALID_REVIEW_SUBJECT_KINDS = {"excluded_entity", "form", "relation", "rule"}
 FORM_ROLE_BY_PROFILE = {
     "tt_original": "official_tt",
     "ru_adaptation": "official_ru_or_russified_primary",

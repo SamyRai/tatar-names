@@ -1,0 +1,140 @@
+{
+  "fields": [
+    {
+      "name": "alias_id",
+      "type": "string",
+      "constraints": {
+        "required": true,
+        "pattern": "^a_[0-9]{7}$"
+      }
+    },
+    {
+      "name": "form_id",
+      "type": "string",
+      "constraints": {
+        "required": true,
+        "pattern": "^f_[0-9]{7}$"
+      }
+    },
+    {
+      "name": "name_id",
+      "type": "string",
+      "constraints": {
+        "required": true,
+        "pattern": "^ttn_[0-9]{6}$"
+      }
+    },
+    {
+      "name": "alias",
+      "type": "string",
+      "constraints": {
+        "required": true,
+        "minLength": 1
+      }
+    },
+    {
+      "name": "script",
+      "type": "string",
+      "constraints": {
+        "required": true,
+        "enum": [
+          "Cyrl",
+          "Latn"
+        ]
+      }
+    },
+    {
+      "name": "language_tag",
+      "type": "string",
+      "constraints": {
+        "required": true,
+        "minLength": 1
+      }
+    },
+    {
+      "name": "alias_type",
+      "type": "string",
+      "constraints": {
+        "required": true,
+        "enum": [
+          "official_tt",
+          "official_ru",
+          "transliteration",
+          "passport_latin",
+          "common_variant",
+          "typo_observed"
+        ]
+      }
+    },
+    {
+      "name": "method",
+      "type": "string",
+      "constraints": {
+        "required": true,
+        "minLength": 1
+      }
+    },
+    {
+      "name": "confidence",
+      "type": "string",
+      "constraints": {
+        "required": true,
+        "pattern": "^(0(\\.[0-9]+)?|1(\\.0+)?)$"
+      }
+    },
+    {
+      "name": "merge_policy",
+      "type": "string",
+      "constraints": {
+        "required": true,
+        "enum": [
+          "auto_merge",
+          "candidate_only",
+          "never_merge",
+          "review_required"
+        ]
+      }
+    },
+    {
+      "name": "source_id",
+      "type": "string",
+      "constraints": {
+        "required": true
+      }
+    },
+    {
+      "name": "rule_id",
+      "type": "string",
+      "constraints": {
+        "required": true
+      }
+    }
+  ],
+  "primaryKey": [
+    "alias_id"
+  ],
+  "foreignKeys": [
+    {
+      "fields": [
+        "form_id"
+      ],
+      "reference": {
+        "resource": "forms",
+        "fields": [
+          "form_id"
+        ]
+      }
+    },
+    {
+      "fields": [
+        "name_id"
+      ],
+      "reference": {
+        "resource": "identities",
+        "fields": [
+          "name_id"
+        ]
+      }
+    }
+  ]
+}

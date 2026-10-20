@@ -1,0 +1,85 @@
+{
+  "fields": [
+    {
+      "name": "review_id",
+      "type": "string",
+      "constraints": {
+        "required": true,
+        "pattern": "^rq_[0-9]{7}$"
+      }
+    },
+    {
+      "name": "subject_kind",
+      "type": "string",
+      "constraints": {
+        "required": true,
+        "enum": [
+          "excluded_entity",
+          "form",
+          "relation",
+          "rule"
+        ]
+      }
+    },
+    {
+      "name": "subject_id",
+      "type": "string",
+      "constraints": {
+        "required": true,
+        "minLength": 1
+      }
+    },
+    {
+      "name": "queue_reason",
+      "type": "string",
+      "constraints": {
+        "required": true,
+        "minLength": 1
+      }
+    },
+    {
+      "name": "suggested_relation",
+      "type": "string",
+      "constraints": {
+        "required": true,
+        "enum": [
+          "",
+          "same_name_official_pair",
+          "same_name_script_variant",
+          "same_name_adapted_form",
+          "same_etymon_but_distinct",
+          "possible_variant",
+          "near_confusable_but_distinct",
+          "russified_primary_form",
+          "tatarized_form_of_non_tatar_name",
+          "review_candidate"
+        ]
+      }
+    },
+    {
+      "name": "source_id",
+      "type": "string",
+      "constraints": {
+        "required": true,
+        "minLength": 1
+      }
+    },
+    {
+      "name": "evidence_id",
+      "type": "string",
+      "constraints": {
+        "required": true
+      }
+    },
+    {
+      "name": "notes",
+      "type": "string",
+      "constraints": {
+        "required": true
+      }
+    }
+  ],
+  "primaryKey": [
+    "review_id"
+  ]
+}

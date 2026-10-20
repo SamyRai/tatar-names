@@ -1,0 +1,139 @@
+{
+  "fields": [
+    {
+      "name": "form_id",
+      "type": "string",
+      "constraints": {
+        "required": true,
+        "pattern": "^f_[0-9]{7}$"
+      }
+    },
+    {
+      "name": "name_id",
+      "type": "string",
+      "constraints": {
+        "required": true,
+        "pattern": "^ttn_[0-9]{6}$"
+      }
+    },
+    {
+      "name": "form",
+      "type": "string",
+      "constraints": {
+        "required": true,
+        "minLength": 1
+      }
+    },
+    {
+      "name": "script",
+      "type": "string",
+      "constraints": {
+        "required": true,
+        "enum": [
+          "Cyrl",
+          "Latn"
+        ]
+      }
+    },
+    {
+      "name": "language_tag",
+      "type": "string",
+      "constraints": {
+        "required": true,
+        "minLength": 1
+      }
+    },
+    {
+      "name": "form_role",
+      "type": "string",
+      "constraints": {
+        "required": true,
+        "enum": [
+          "official_tt",
+          "official_ru_or_russified_primary",
+          "tt_latin_transliteration",
+          "passport_latin",
+          "common_observed"
+        ]
+      }
+    },
+    {
+      "name": "identity_status",
+      "type": "string",
+      "constraints": {
+        "required": true,
+        "enum": [
+          "canonical",
+          "variant",
+          "alias"
+        ]
+      }
+    },
+    {
+      "name": "profile",
+      "type": "string",
+      "constraints": {
+        "required": true,
+        "enum": [
+          "ru_adaptation",
+          "tt_original",
+          "tt_cyrl_to_tt_latn_rt2013",
+          "ru_cyrl_to_latn_mvd_doc",
+          "common_variant"
+        ]
+      }
+    },
+    {
+      "name": "confidence",
+      "type": "string",
+      "constraints": {
+        "required": true,
+        "pattern": "^(0(\\.[0-9]+)?|1(\\.0+)?)$"
+      }
+    },
+    {
+      "name": "source_id",
+      "type": "string",
+      "constraints": {
+        "required": true,
+        "minLength": 1
+      }
+    },
+    {
+      "name": "evidence_id",
+      "type": "string",
+      "constraints": {
+        "required": true
+      }
+    },
+    {
+      "name": "merge_policy",
+      "type": "string",
+      "constraints": {
+        "required": true,
+        "enum": [
+          "auto_merge",
+          "candidate_only",
+          "never_merge",
+          "review_required"
+        ]
+      }
+    }
+  ],
+  "primaryKey": [
+    "form_id"
+  ],
+  "foreignKeys": [
+    {
+      "fields": [
+        "name_id"
+      ],
+      "reference": {
+        "resource": "identities",
+        "fields": [
+          "name_id"
+        ]
+      }
+    }
+  ]
+}
