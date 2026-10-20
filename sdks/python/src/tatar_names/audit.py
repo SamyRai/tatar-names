@@ -3,7 +3,7 @@ from __future__ import annotations
 from collections import Counter, defaultdict
 from pathlib import Path
 
-from .data import default_release_dir, default_source_dir, project_root
+from .data import default_release_dir, default_source_dir, rules_path
 from .formations import detect_generated_formation, is_suspicious_repetition
 from . import normalize
 from .pipeline import release_table, source_table
@@ -12,7 +12,7 @@ from .pipeline import release_table, source_table
 def _parse_confusables() -> list[dict[str, str]]:
     rows: list[dict[str, str]] = []
     current: dict[str, str] | None = None
-    for raw_line in (project_root() / "rules" / "confusables.yaml").read_text(encoding="utf-8").splitlines():
+    for raw_line in rules_path("confusables.yaml").read_text(encoding="utf-8").splitlines():
         line = raw_line.strip()
         if not line or line.startswith("#") or line.startswith("version:") or line == "do_not_merge:":
             continue

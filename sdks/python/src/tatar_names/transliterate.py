@@ -11,7 +11,7 @@ from dataclasses import dataclass
 from functools import lru_cache
 from typing import Literal
 
-from .data import project_root
+from .data import rules_path
 
 ProfilePurpose = Literal["search_candidate", "documentary_candidate"]
 
@@ -24,7 +24,7 @@ PROFILE_FILES = {
 
 
 def _load_simple_yaml_map(filename: str) -> dict[str, str]:
-    path = project_root() / "rules" / filename
+    path = rules_path(filename)
     mapping: dict[str, str] = {}
     in_map = False
     for raw_line in path.read_text(encoding="utf-8").splitlines():
