@@ -1,0 +1,122 @@
+{
+  "fields": [
+    {
+      "name": "relation_id",
+      "type": "string",
+      "constraints": {
+        "required": true,
+        "pattern": "^rel_[0-9]{7}$"
+      }
+    },
+    {
+      "name": "left_kind",
+      "type": "string",
+      "constraints": {
+        "required": true,
+        "enum": [
+          "name",
+          "form"
+        ]
+      }
+    },
+    {
+      "name": "left_id",
+      "type": "string",
+      "constraints": {
+        "required": true,
+        "minLength": 1
+      }
+    },
+    {
+      "name": "right_kind",
+      "type": "string",
+      "constraints": {
+        "required": true,
+        "enum": [
+          "name",
+          "form"
+        ]
+      }
+    },
+    {
+      "name": "right_id",
+      "type": "string",
+      "constraints": {
+        "required": true,
+        "minLength": 1
+      }
+    },
+    {
+      "name": "relation",
+      "type": "string",
+      "constraints": {
+        "required": true,
+        "enum": [
+          "same_name_official_pair",
+          "same_name_script_variant",
+          "same_name_adapted_form",
+          "same_etymon_but_distinct",
+          "possible_variant",
+          "near_confusable_but_distinct",
+          "russified_primary_form",
+          "tatarized_form_of_non_tatar_name",
+          "review_candidate"
+        ]
+      }
+    },
+    {
+      "name": "merge_policy",
+      "type": "string",
+      "constraints": {
+        "required": true,
+        "enum": [
+          "auto_merge",
+          "candidate_only",
+          "never_merge",
+          "review_required"
+        ]
+      }
+    },
+    {
+      "name": "confidence",
+      "type": "string",
+      "constraints": {
+        "required": true,
+        "pattern": "^(0(\\.[0-9]+)?|1(\\.0+)?)$"
+      }
+    },
+    {
+      "name": "evidence_type",
+      "type": "string",
+      "constraints": {
+        "required": true,
+        "minLength": 1
+      }
+    },
+    {
+      "name": "source_id",
+      "type": "string",
+      "constraints": {
+        "required": true,
+        "minLength": 1
+      }
+    },
+    {
+      "name": "evidence_id",
+      "type": "string",
+      "constraints": {
+        "required": true
+      }
+    },
+    {
+      "name": "notes",
+      "type": "string",
+      "constraints": {
+        "required": true
+      }
+    }
+  ],
+  "primaryKey": [
+    "relation_id"
+  ]
+}

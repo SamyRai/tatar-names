@@ -1,0 +1,145 @@
+{
+  "fields": [
+    {
+      "name": "name_id",
+      "type": "string",
+      "constraints": {
+        "required": true,
+        "pattern": "^ttn_[0-9]{6}$"
+      }
+    },
+    {
+      "name": "entity_type",
+      "type": "string",
+      "constraints": {
+        "required": true,
+        "enum": [
+          "given",
+          "surname"
+        ]
+      }
+    },
+    {
+      "name": "gender",
+      "type": "string",
+      "constraints": {
+        "required": true,
+        "enum": [
+          "male",
+          "female",
+          "unisex",
+          "unknown"
+        ]
+      }
+    },
+    {
+      "name": "origin_family",
+      "type": "string",
+      "constraints": {
+        "required": true,
+        "minLength": 1
+      }
+    },
+    {
+      "name": "usage_community",
+      "type": "string",
+      "constraints": {
+        "required": true,
+        "minLength": 1
+      }
+    },
+    {
+      "name": "canonical_tt_cyrl",
+      "type": "string",
+      "constraints": {
+        "required": true,
+        "minLength": 1
+      }
+    },
+    {
+      "name": "canonical_ru_cyrl",
+      "type": "string",
+      "constraints": {
+        "required": true,
+        "minLength": 1
+      }
+    },
+    {
+      "name": "canonical_tt_latn",
+      "type": "string",
+      "constraints": {
+        "required": true,
+        "minLength": 1
+      }
+    },
+    {
+      "name": "canonical_ru_latn",
+      "type": "string",
+      "constraints": {
+        "required": true,
+        "minLength": 1
+      }
+    },
+    {
+      "name": "primary_form_global",
+      "type": "string",
+      "constraints": {
+        "required": true,
+        "minLength": 1
+      }
+    },
+    {
+      "name": "primary_form_tt",
+      "type": "string",
+      "constraints": {
+        "required": true,
+        "minLength": 1
+      }
+    },
+    {
+      "name": "primary_form_ru",
+      "type": "string",
+      "constraints": {
+        "required": true,
+        "minLength": 1
+      }
+    },
+    {
+      "name": "source_id",
+      "type": "string",
+      "constraints": {
+        "required": true,
+        "minLength": 1
+      }
+    },
+    {
+      "name": "source_row",
+      "type": "string",
+      "constraints": {
+        "required": true
+      }
+    },
+    {
+      "name": "status",
+      "type": "string",
+      "constraints": {
+        "required": true,
+        "enum": [
+          "active",
+          "deprecated",
+          "disputed"
+        ]
+      }
+    },
+    {
+      "name": "notes",
+      "type": "string",
+      "constraints": {
+        "required": true
+      }
+    }
+  ],
+  "primaryKey": [
+    "name_id"
+  ]
+}
