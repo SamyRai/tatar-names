@@ -289,9 +289,11 @@ def validate_source(data_dir: str | Path | None = None) -> list[str]:
         if formation:
             errors.append(f"attestation {attestation_id} stores generated formation {formation.policy}: {row['form']!r}")
         if row["is_canonical"] == "false":
-            key = (normalize.safe(row["form"]), row["script"], row["language_tag"])
-            alias_candidate_types[key].add(entity_by_id[row["entity_id"]]["entity_type"])
-            alias_candidate_entities[key].add(row["entity_id"])
+            known_entity = entity_by_id.get(row["entity_id"])
+            if known_entity is not None:
+                key = (normalize.safe(row["form"]), row["script"], row["language_tag"])
+                alias_candidate_types[key].add(known_entity["entity_type"])
+                alias_candidate_entities[key].add(row["entity_id"])
 
     for key, types in alias_candidate_types.items():
         if len(types) > 1:
@@ -345,11 +347,61 @@ def build_release_rows(source_dir: str | Path | None = None) -> dict[str, list[d
     for row in candidate_forms:
         exact_to_rows[(row["form"], row["script"], row["language_tag"])].append(row)
 
+    review_rows: list[dict[str, str]] = []
+    review_index = 1
+
+    def add_review(
+        subject_kind: str,
+        subject_id: str,
+        queue_reason: str,
+        suggested_relation: str,
+        source_id: str,
+        evidence_id: str,
+        notes: str,
+    ) -> None:
+        nonlocal review_index
+        review_rows.append(
+            _review_queue_row(
+                f"rq_{review_index:07d}",
+                subject_kind,
+                subject_id,
+                queue_reason,
+                suggested_relation,
+                source_id,
+                evidence_id,
+                notes,
+            )
+        )
+        review_index += 1
+
     forms_rows: list[dict[str, str]] = []
     for rows in exact_to_rows.values():
-        if len({row["entity_id"] for row in rows}) > 1:
-            continue
+        group_entity_ids = {row["entity_id"] for row in rows}
         best = max(rows, key=_form_quality_key)
+        if len(group_entity_ids) > 1:
+            for row in rows:
+                add_review(
+                    "form",
+                    row["attestation_id"],
+                    "shared_spelling_group",
+                    "review_candidate",
+                    row["source_id"],
+                    row["evidence_id"],
+                    f"{row['form']} shared_by={', '.join(sorted(group_entity_ids))}",
+                )
+            continue
+        for row in rows:
+            if row is best:
+                continue
+            add_review(
+                "form",
+                row["attestation_id"],
+                "superseded_attestation",
+                "review_candidate",
+                row["source_id"],
+                row["evidence_id"],
+                f"{row['form']} superseded_by={best['attestation_id']}",
+            )
         forms_rows.append(_release_form_row(best))
     forms_rows.sort(key=lambda row: row["form_id"])
 
@@ -391,33 +443,6 @@ def build_release_rows(source_dir: str | Path | None = None) -> dict[str, list[d
             }
         )
         relation_index += 1
-
-    review_rows: list[dict[str, str]] = []
-    review_index = 1
-
-    def add_review(
-        subject_kind: str,
-        subject_id: str,
-        queue_reason: str,
-        suggested_relation: str,
-        source_id: str,
-        evidence_id: str,
-        notes: str,
-    ) -> None:
-        nonlocal review_index
-        review_rows.append(
-            _review_queue_row(
-                f"rq_{review_index:07d}",
-                subject_kind,
-                subject_id,
-                queue_reason,
-                suggested_relation,
-                source_id,
-                evidence_id,
-                notes,
-            )
-        )
-        review_index += 1
 
     identity_by_id = {row["name_id"]: row for row in identities_rows}
     for form_row in forms_rows:
