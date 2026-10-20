@@ -94,6 +94,12 @@ def _match_type(form: Form) -> str:
     return "variant"
 
 
+MERGE_ADVISORY = (
+    "merge_recommendation describes form-level linkage only; "
+    "person-record merges require independent evidence"
+)
+
+
 def _score(form: Form, query: str) -> tuple[int, float, int]:
     exact_bonus = 1 if normalize.safe(form.form) == normalize.safe(query) else 0
     merge_bonus = 1 if form.merge_policy == "auto_merge" else 0
@@ -167,7 +173,9 @@ def resolve(value: str, data_dir: str | Path | None = None) -> dict[str, object]
     merge_recommendation = "no_match"
     if best_match:
         if best_match["merge_policy"] == "auto_merge" and not relation_warnings:
-            merge_recommendation = "safe_auto_merge"
+            # A lexical form match cannot authorize merging person records,
+            # so the value names what it knows: a form-level match.
+            merge_recommendation = "form_match_auto_merge"
         elif best_match["merge_policy"] == "never_merge":
             merge_recommendation = "never_merge"
         else:
@@ -180,4 +188,5 @@ def resolve(value: str, data_dir: str | Path | None = None) -> dict[str, object]
         "near_misses": near_misses,
         "relation_warnings": relation_warnings,
         "merge_recommendation": merge_recommendation,
+        "advisory": MERGE_ADVISORY,
     }
