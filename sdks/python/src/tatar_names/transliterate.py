@@ -1,8 +1,19 @@
+"""Deterministic Cyrillic-to-Latin transliteration profiles.
+
+Profiles are interchangeable at the call site but not at the contract level:
+each carries a ``ProfileContract`` declaring its purpose and limits. None of
+these profiles is a legal transliteration authority.
+"""
+
 from __future__ import annotations
 
+from dataclasses import dataclass
 from functools import lru_cache
+from typing import Literal
 
 from .data import project_root
+
+ProfilePurpose = Literal["search_candidate", "documentary_candidate"]
 
 PROFILE_FILES = {
     # "rt2013" is a historical id: this map is a lossy ASCII search fold
@@ -31,8 +42,48 @@ def _load_simple_yaml_map(filename: str) -> dict[str, str]:
     return mapping
 
 
+@dataclass(frozen=True)
+class ProfileContract:
+    """What a transliteration profile guarantees; see docs/transliteration.md."""
+
+    profile_id: str
+    purpose: ProfilePurpose
+    lossy: bool
+    legal_authority: bool
+    notes: str
+
+
+_PROFILE_CONTRACTS: tuple[ProfileContract, ...] = (
+    ProfileContract(
+        profile_id="tt_cyrl_to_tt_latn_rt2013",
+        purpose="search_candidate",
+        lossy=True,
+        legal_authority=False,
+        notes=(
+            "Lossy ASCII search fold: ә/а, ө/о, ү/у, ң/н collapse onto one "
+            "letter. The id is historical; this is not the RT-2013 legal annex."
+        ),
+    ),
+    ProfileContract(
+        profile_id="ru_cyrl_to_latn_mvd_doc",
+        purpose="documentary_candidate",
+        lossy=True,
+        legal_authority=False,
+        notes=(
+            "Passport-style documentary approximations (kh/ts/shch) for "
+            "candidate generation, not a legal transliteration authority."
+        ),
+    ),
+)
+
+
+def profiles() -> tuple[ProfileContract, ...]:
+    """Return the declared contract of every available profile."""
+    return _PROFILE_CONTRACTS
+
+
 def available_profiles() -> tuple[str, ...]:
-    return tuple(PROFILE_FILES)
+    return tuple(contract.profile_id for contract in _PROFILE_CONTRACTS)
 
 
 @lru_cache(maxsize=None)
