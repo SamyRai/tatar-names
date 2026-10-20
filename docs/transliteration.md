@@ -5,7 +5,7 @@ The toolkit includes small deterministic transliterators:
 - `ru_cyrl_to_latn_mvd_doc`: Russian Cyrillic to Latin, passport-style enough for candidate generation.
 - `tt_cyrl_to_tt_latn_rt2013`: Tatar Cyrillic to Latin (see the caveat below).
 
-Rules live in YAML under `rules/` and are loaded by named profile. These rules are intended for resolver candidates and release forms. They are not a legal transliteration authority.
+Rules live as YAML tables bundled inside the package (`sdks/python/src/tatar_names/rules/`) and are loaded by named profile. These rules are intended for resolver candidates and release forms. They are not a legal transliteration authority.
 
 ## `tt_cyrl_to_tt_latn_rt2013` is a lossy ASCII search fold, not the legal annex
 
