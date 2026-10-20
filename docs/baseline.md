@@ -26,6 +26,22 @@ Every `resolve()` call re-parses all release tables (~224k rows / ~30 MB); the
 index work planned for the resolver phase targets warm steady-state p95 < 10 ms
 for exact lookups, measured against this baseline with repeated samples.
 
+## 2026-10-21 re-measurement (after the correctness, contract, compiler, and resolver waves)
+
+Same host, 20 samples. The committed release at this point carries stable
+content-derived relation ids and Croissant 1.1 / Data Package v2 metadata.
+
+| Path | v0.1.0 baseline | 2026-10-21 |
+| --- | --- | --- |
+| `resolve()` exact, per call | 1.07 s median (re-reads tables every call) | cold first call 0.95 s (one-time index build); warm p50 37 µs, p95 57 µs, max 189 µs |
+| `resolve()` alias branch, per call | 1.20 s median | warm p50 38 µs, p95 75 µs |
+| Relation-coverage scan (audit) | 68 s standalone / 122 s embedded | linear pass; `analyze_patterns` end-to-end 3.6 s |
+| `pytest` full suite | 85 s / 23 tests | 48 s / 131 tests + 3 validator skips |
+| `relations.csv` ids | insertion-order `rel_0000001…` | content-derived `rel_<12-hex>` (all 154,696 unique) |
+
+The standalone 68 s scan row is kept as a mirror of the original O(n×m) logic
+for reference; the shipped audit now uses the linear pass.
+
 ## Row counts and table hashes
 
 | Table | Rows | SHA-256 |
