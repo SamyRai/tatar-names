@@ -17,7 +17,7 @@ The build step materializes `data/release/*.csv` from that source layer:
 1. `identities.csv` stores canonical name identities and context-specific primary forms.
 2. `forms.csv` stores concrete spellings and transliterations with explicit role and merge semantics.
 3. `relations.csv` stores relations between names and forms, including official pairs, script variants, and hard negatives.
-4. `review_queue.csv` stores structured review work for weak evidence and excluded rows.
+4. `review_queue.csv` stores structured review work: weak evidence, excluded rows, ambiguous spellings shared by several identities, and superseded attestations.
 5. `aliases.csv` stores constrained compatibility lookup spellings derived after relation semantics are applied.
 
 The mental model is:
@@ -53,6 +53,14 @@ Key release semantics:
   - `never_merge`
   - `review_required`
 - `relation` is descriptive evidence, not by itself permission to merge.
+
+`review_queue.csv` rows carry a `queue_reason` from a closed set:
+
+- `weak_evidence_form`: a released form whose evidence is thin (merge policy `candidate_only` or `review_required`).
+- `shared_spelling_group`: an exact spelling attested for more than one identity. No form row is emitted for that spelling until the ambiguity is resolved; each member attestation gets its own row listing every identity sharing it.
+- `superseded_attestation`: a source-backed spelling that lost the per-group quality ranking and is therefore absent from `forms.csv`. The row preserves the form and the attestation that superseded it, so no evidence disappears in a build.
+- `confusable_rule_not_in_dataset`: a hard-negative rule whose names are not all present in the release.
+- Reasons carried over from the exclusion layer: `generated_patronymic`, `missing_tatar_canonical`, `patronymic_shaped_surname`.
 
 Closeness levels used by the release model:
 
