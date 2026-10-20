@@ -1,53 +1,54 @@
 {
-  "profile": "tabular-data-package",
-  "name": "tatar-names",
-  "title": "Tatar Names",
+  "$schema": "https://datapackage.org/profiles/2.0/datapackage.json",
+  "description": "Tatar Names is a source-first dataset for auditable Tatar, Russian, and Latin name matching.",
   "licenses": [
     {
       "name": "CC-BY-4.0",
       "path": "https://creativecommons.org/licenses/by/4.0/"
     }
   ],
+  "name": "tatar-names",
   "resources": [
     {
+      "encoding": "utf-8",
+      "format": "csv",
+      "mediatype": "text/csv",
       "name": "identities",
       "path": "identities.csv",
-      "format": "csv",
-      "schema": {
-        "path": "../../schemas/identities.schema.json"
-      }
+      "schema": "https://raw.githubusercontent.com/SamyRai/tatar-names/v0.1.0/schemas/tableschema/identities.tableschema.json"
     },
     {
+      "encoding": "utf-8",
+      "format": "csv",
+      "mediatype": "text/csv",
       "name": "forms",
       "path": "forms.csv",
-      "format": "csv",
-      "schema": {
-        "path": "../../schemas/forms.schema.json"
-      }
+      "schema": "https://raw.githubusercontent.com/SamyRai/tatar-names/v0.1.0/schemas/tableschema/forms.tableschema.json"
     },
     {
+      "encoding": "utf-8",
+      "format": "csv",
+      "mediatype": "text/csv",
       "name": "relations",
       "path": "relations.csv",
-      "format": "csv",
-      "schema": {
-        "path": "../../schemas/relations.schema.json"
-      }
+      "schema": "https://raw.githubusercontent.com/SamyRai/tatar-names/v0.1.0/schemas/tableschema/relations.tableschema.json"
     },
     {
+      "encoding": "utf-8",
+      "format": "csv",
+      "mediatype": "text/csv",
       "name": "review_queue",
       "path": "review_queue.csv",
-      "format": "csv",
-      "schema": {
-        "path": "../../schemas/review_queue.schema.json"
-      }
+      "schema": "https://raw.githubusercontent.com/SamyRai/tatar-names/v0.1.0/schemas/tableschema/review_queue.tableschema.json"
     },
     {
+      "encoding": "utf-8",
+      "format": "csv",
+      "mediatype": "text/csv",
       "name": "aliases",
       "path": "aliases.csv",
-      "format": "csv",
-      "schema": {
-        "path": "../../schemas/aliases.schema.json"
-      }
+      "schema": "https://raw.githubusercontent.com/SamyRai/tatar-names/v0.1.0/schemas/tableschema/aliases.tableschema.json"
     }
-  ]
+  ],
+  "title": "Tatar Names"
 }

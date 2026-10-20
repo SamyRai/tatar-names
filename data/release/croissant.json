@@ -1,38 +1,940 @@
 {
-  "@context": "https://schema.org/",
+  "@context": {
+    "@language": "en",
+    "@vocab": "https://schema.org/",
+    "arrayShape": "cr:arrayShape",
+    "citeAs": "cr:citeAs",
+    "column": "cr:column",
+    "conformsTo": "dct:conformsTo",
+    "containedIn": "cr:containedIn",
+    "cr": "http://mlcommons.org/croissant/",
+    "data": {
+      "@id": "cr:data",
+      "@type": "@json"
+    },
+    "dataType": {
+      "@id": "cr:dataType",
+      "@type": "@vocab"
+    },
+    "dct": "http://purl.org/dc/terms/",
+    "description": {
+      "@container": "@language"
+    },
+    "equivalentProperty": "cr:equivalentProperty",
+    "examples": {
+      "@id": "cr:examples",
+      "@type": "@json"
+    },
+    "extract": "cr:extract",
+    "field": "cr:field",
+    "fileObject": "cr:fileObject",
+    "fileProperty": "cr:fileProperty",
+    "fileSet": "cr:fileSet",
+    "format": "cr:format",
+    "includes": "cr:includes",
+    "isArray": "cr:isArray",
+    "isLiveDataset": "cr:isLiveDataset",
+    "jsonPath": "cr:jsonPath",
+    "key": "cr:key",
+    "md5": "cr:md5",
+    "name": {
+      "@container": "@language"
+    },
+    "parentField": "cr:parentField",
+    "path": "cr:path",
+    "rai": "http://mlcommons.org/croissant/RAI/",
+    "recordSet": "cr:recordSet",
+    "references": "cr:references",
+    "regex": "cr:regex",
+    "repeated": "cr:repeated",
+    "replace": "cr:replace",
+    "samplingRate": "cr:samplingRate",
+    "sc": "https://schema.org/",
+    "separator": "cr:separator",
+    "source": "cr:source",
+    "subField": "cr:subField",
+    "transform": "cr:transform"
+  },
   "@type": "Dataset",
-  "name": "Tatar Names",
-  "license": "https://creativecommons.org/licenses/by/4.0/",
+  "conformsTo": "http://mlcommons.org/croissant/1.1",
+  "creator": {
+    "@type": "Person",
+    "name": "Damir Mukimov"
+  },
+  "datePublished": "1970-01-01T00:00:00Z",
+  "description": "Tatar Names is a source-first dataset for auditable Tatar, Russian, and Latin name matching.",
   "distribution": [
     {
-      "@type": "DataDownload",
-      "name": "identities",
-      "contentUrl": "data/release/identities.csv",
-      "encodingFormat": "text/csv"
+      "@id": "identities.csv",
+      "@type": "cr:FileObject",
+      "contentSize": "2228128 B",
+      "contentUrl": "https://github.com/SamyRai/tatar-names/releases/tag/v0.1.0/identities.csv",
+      "encodingFormat": "text/csv",
+      "name": "identities.csv",
+      "sha256": "827572d778e2002ab38a2415a4dbb9fce595367601d511e804716a2934762b2b"
     },
     {
-      "@type": "DataDownload",
-      "name": "forms",
-      "contentUrl": "data/release/forms.csv",
-      "encodingFormat": "text/csv"
+      "@id": "forms.csv",
+      "@type": "cr:FileObject",
+      "contentSize": "7425877 B",
+      "contentUrl": "https://github.com/SamyRai/tatar-names/releases/tag/v0.1.0/forms.csv",
+      "encodingFormat": "text/csv",
+      "name": "forms.csv",
+      "sha256": "a215e7a6edbac835dfc17d695196c25d71c3143068f47b35c872e7c48558d013"
     },
     {
-      "@type": "DataDownload",
-      "name": "relations",
-      "contentUrl": "data/release/relations.csv",
-      "encodingFormat": "text/csv"
+      "@id": "relations.csv",
+      "@type": "cr:FileObject",
+      "contentSize": "22759080 B",
+      "contentUrl": "https://github.com/SamyRai/tatar-names/releases/tag/v0.1.0/relations.csv",
+      "encodingFormat": "text/csv",
+      "name": "relations.csv",
+      "sha256": "c13b344cc805e4921da00468dc1533be6a8cdd3b1f4f5d40d7ad2ebf6f28c4ca"
     },
     {
-      "@type": "DataDownload",
-      "name": "review_queue",
-      "contentUrl": "data/release/review_queue.csv",
-      "encodingFormat": "text/csv"
+      "@id": "review_queue.csv",
+      "@type": "cr:FileObject",
+      "contentSize": "2305646 B",
+      "contentUrl": "https://github.com/SamyRai/tatar-names/releases/tag/v0.1.0/review_queue.csv",
+      "encodingFormat": "text/csv",
+      "name": "review_queue.csv",
+      "sha256": "7ecd3c98d11e6b18c729f68e042bb081f7cc5389685af8e090be24bbfcb36dc5"
     },
     {
-      "@type": "DataDownload",
-      "name": "aliases",
-      "contentUrl": "data/release/aliases.csv",
-      "encodingFormat": "text/csv"
+      "@id": "aliases.csv",
+      "@type": "cr:FileObject",
+      "contentSize": "1182 B",
+      "contentUrl": "https://github.com/SamyRai/tatar-names/releases/tag/v0.1.0/aliases.csv",
+      "encodingFormat": "text/csv",
+      "name": "aliases.csv",
+      "sha256": "79cc2a49c0651d4a6243596427ae2d4f9c2ba7b4e82ebaacf702d9e0679dc55b"
     }
-  ]
+  ],
+  "keywords": [
+    "names",
+    "tatar",
+    "russian",
+    "transliteration",
+    "onomastics"
+  ],
+  "license": "https://creativecommons.org/licenses/by/4.0/",
+  "name": "Tatar Names",
+  "recordSet": [
+    {
+      "@id": "identities",
+      "@type": "cr:RecordSet",
+      "field": [
+        {
+          "@type": "cr:Field",
+          "dataType": "sc:Text",
+          "name": "name_id",
+          "source": {
+            "extract": {
+              "column": "name_id"
+            },
+            "fileObject": {
+              "@id": "identities.csv"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "dataType": "sc:Text",
+          "name": "entity_type",
+          "source": {
+            "extract": {
+              "column": "entity_type"
+            },
+            "fileObject": {
+              "@id": "identities.csv"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "dataType": "sc:Text",
+          "name": "gender",
+          "source": {
+            "extract": {
+              "column": "gender"
+            },
+            "fileObject": {
+              "@id": "identities.csv"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "dataType": "sc:Text",
+          "name": "origin_family",
+          "source": {
+            "extract": {
+              "column": "origin_family"
+            },
+            "fileObject": {
+              "@id": "identities.csv"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "dataType": "sc:Text",
+          "name": "usage_community",
+          "source": {
+            "extract": {
+              "column": "usage_community"
+            },
+            "fileObject": {
+              "@id": "identities.csv"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "dataType": "sc:Text",
+          "name": "canonical_tt_cyrl",
+          "source": {
+            "extract": {
+              "column": "canonical_tt_cyrl"
+            },
+            "fileObject": {
+              "@id": "identities.csv"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "dataType": "sc:Text",
+          "name": "canonical_ru_cyrl",
+          "source": {
+            "extract": {
+              "column": "canonical_ru_cyrl"
+            },
+            "fileObject": {
+              "@id": "identities.csv"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "dataType": "sc:Text",
+          "name": "canonical_tt_latn",
+          "source": {
+            "extract": {
+              "column": "canonical_tt_latn"
+            },
+            "fileObject": {
+              "@id": "identities.csv"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "dataType": "sc:Text",
+          "name": "canonical_ru_latn",
+          "source": {
+            "extract": {
+              "column": "canonical_ru_latn"
+            },
+            "fileObject": {
+              "@id": "identities.csv"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "dataType": "sc:Text",
+          "name": "primary_form_global",
+          "source": {
+            "extract": {
+              "column": "primary_form_global"
+            },
+            "fileObject": {
+              "@id": "identities.csv"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "dataType": "sc:Text",
+          "name": "primary_form_tt",
+          "source": {
+            "extract": {
+              "column": "primary_form_tt"
+            },
+            "fileObject": {
+              "@id": "identities.csv"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "dataType": "sc:Text",
+          "name": "primary_form_ru",
+          "source": {
+            "extract": {
+              "column": "primary_form_ru"
+            },
+            "fileObject": {
+              "@id": "identities.csv"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "dataType": "sc:Text",
+          "name": "source_id",
+          "source": {
+            "extract": {
+              "column": "source_id"
+            },
+            "fileObject": {
+              "@id": "identities.csv"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "dataType": "sc:Text",
+          "name": "source_row",
+          "source": {
+            "extract": {
+              "column": "source_row"
+            },
+            "fileObject": {
+              "@id": "identities.csv"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "dataType": "sc:Text",
+          "name": "status",
+          "source": {
+            "extract": {
+              "column": "status"
+            },
+            "fileObject": {
+              "@id": "identities.csv"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "dataType": "sc:Text",
+          "name": "notes",
+          "source": {
+            "extract": {
+              "column": "notes"
+            },
+            "fileObject": {
+              "@id": "identities.csv"
+            }
+          }
+        }
+      ],
+      "name": "identities"
+    },
+    {
+      "@id": "forms",
+      "@type": "cr:RecordSet",
+      "field": [
+        {
+          "@type": "cr:Field",
+          "dataType": "sc:Text",
+          "name": "form_id",
+          "source": {
+            "extract": {
+              "column": "form_id"
+            },
+            "fileObject": {
+              "@id": "forms.csv"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "dataType": "sc:Text",
+          "name": "name_id",
+          "source": {
+            "extract": {
+              "column": "name_id"
+            },
+            "fileObject": {
+              "@id": "forms.csv"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "dataType": "sc:Text",
+          "name": "form",
+          "source": {
+            "extract": {
+              "column": "form"
+            },
+            "fileObject": {
+              "@id": "forms.csv"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "dataType": "sc:Text",
+          "name": "script",
+          "source": {
+            "extract": {
+              "column": "script"
+            },
+            "fileObject": {
+              "@id": "forms.csv"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "dataType": "sc:Text",
+          "name": "language_tag",
+          "source": {
+            "extract": {
+              "column": "language_tag"
+            },
+            "fileObject": {
+              "@id": "forms.csv"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "dataType": "sc:Text",
+          "name": "form_role",
+          "source": {
+            "extract": {
+              "column": "form_role"
+            },
+            "fileObject": {
+              "@id": "forms.csv"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "dataType": "sc:Text",
+          "name": "identity_status",
+          "source": {
+            "extract": {
+              "column": "identity_status"
+            },
+            "fileObject": {
+              "@id": "forms.csv"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "dataType": "sc:Text",
+          "name": "profile",
+          "source": {
+            "extract": {
+              "column": "profile"
+            },
+            "fileObject": {
+              "@id": "forms.csv"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "dataType": "sc:Text",
+          "name": "confidence",
+          "source": {
+            "extract": {
+              "column": "confidence"
+            },
+            "fileObject": {
+              "@id": "forms.csv"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "dataType": "sc:Text",
+          "name": "source_id",
+          "source": {
+            "extract": {
+              "column": "source_id"
+            },
+            "fileObject": {
+              "@id": "forms.csv"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "dataType": "sc:Text",
+          "name": "evidence_id",
+          "source": {
+            "extract": {
+              "column": "evidence_id"
+            },
+            "fileObject": {
+              "@id": "forms.csv"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "dataType": "sc:Text",
+          "name": "merge_policy",
+          "source": {
+            "extract": {
+              "column": "merge_policy"
+            },
+            "fileObject": {
+              "@id": "forms.csv"
+            }
+          }
+        }
+      ],
+      "name": "forms"
+    },
+    {
+      "@id": "relations",
+      "@type": "cr:RecordSet",
+      "field": [
+        {
+          "@type": "cr:Field",
+          "dataType": "sc:Text",
+          "name": "relation_id",
+          "source": {
+            "extract": {
+              "column": "relation_id"
+            },
+            "fileObject": {
+              "@id": "relations.csv"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "dataType": "sc:Text",
+          "name": "left_kind",
+          "source": {
+            "extract": {
+              "column": "left_kind"
+            },
+            "fileObject": {
+              "@id": "relations.csv"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "dataType": "sc:Text",
+          "name": "left_id",
+          "source": {
+            "extract": {
+              "column": "left_id"
+            },
+            "fileObject": {
+              "@id": "relations.csv"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "dataType": "sc:Text",
+          "name": "right_kind",
+          "source": {
+            "extract": {
+              "column": "right_kind"
+            },
+            "fileObject": {
+              "@id": "relations.csv"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "dataType": "sc:Text",
+          "name": "right_id",
+          "source": {
+            "extract": {
+              "column": "right_id"
+            },
+            "fileObject": {
+              "@id": "relations.csv"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "dataType": "sc:Text",
+          "name": "relation",
+          "source": {
+            "extract": {
+              "column": "relation"
+            },
+            "fileObject": {
+              "@id": "relations.csv"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "dataType": "sc:Text",
+          "name": "merge_policy",
+          "source": {
+            "extract": {
+              "column": "merge_policy"
+            },
+            "fileObject": {
+              "@id": "relations.csv"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "dataType": "sc:Text",
+          "name": "confidence",
+          "source": {
+            "extract": {
+              "column": "confidence"
+            },
+            "fileObject": {
+              "@id": "relations.csv"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "dataType": "sc:Text",
+          "name": "evidence_type",
+          "source": {
+            "extract": {
+              "column": "evidence_type"
+            },
+            "fileObject": {
+              "@id": "relations.csv"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "dataType": "sc:Text",
+          "name": "source_id",
+          "source": {
+            "extract": {
+              "column": "source_id"
+            },
+            "fileObject": {
+              "@id": "relations.csv"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "dataType": "sc:Text",
+          "name": "evidence_id",
+          "source": {
+            "extract": {
+              "column": "evidence_id"
+            },
+            "fileObject": {
+              "@id": "relations.csv"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "dataType": "sc:Text",
+          "name": "notes",
+          "source": {
+            "extract": {
+              "column": "notes"
+            },
+            "fileObject": {
+              "@id": "relations.csv"
+            }
+          }
+        }
+      ],
+      "name": "relations"
+    },
+    {
+      "@id": "review_queue",
+      "@type": "cr:RecordSet",
+      "field": [
+        {
+          "@type": "cr:Field",
+          "dataType": "sc:Text",
+          "name": "review_id",
+          "source": {
+            "extract": {
+              "column": "review_id"
+            },
+            "fileObject": {
+              "@id": "review_queue.csv"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "dataType": "sc:Text",
+          "name": "subject_kind",
+          "source": {
+            "extract": {
+              "column": "subject_kind"
+            },
+            "fileObject": {
+              "@id": "review_queue.csv"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "dataType": "sc:Text",
+          "name": "subject_id",
+          "source": {
+            "extract": {
+              "column": "subject_id"
+            },
+            "fileObject": {
+              "@id": "review_queue.csv"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "dataType": "sc:Text",
+          "name": "queue_reason",
+          "source": {
+            "extract": {
+              "column": "queue_reason"
+            },
+            "fileObject": {
+              "@id": "review_queue.csv"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "dataType": "sc:Text",
+          "name": "suggested_relation",
+          "source": {
+            "extract": {
+              "column": "suggested_relation"
+            },
+            "fileObject": {
+              "@id": "review_queue.csv"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "dataType": "sc:Text",
+          "name": "source_id",
+          "source": {
+            "extract": {
+              "column": "source_id"
+            },
+            "fileObject": {
+              "@id": "review_queue.csv"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "dataType": "sc:Text",
+          "name": "evidence_id",
+          "source": {
+            "extract": {
+              "column": "evidence_id"
+            },
+            "fileObject": {
+              "@id": "review_queue.csv"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "dataType": "sc:Text",
+          "name": "notes",
+          "source": {
+            "extract": {
+              "column": "notes"
+            },
+            "fileObject": {
+              "@id": "review_queue.csv"
+            }
+          }
+        }
+      ],
+      "name": "review_queue"
+    },
+    {
+      "@id": "aliases",
+      "@type": "cr:RecordSet",
+      "field": [
+        {
+          "@type": "cr:Field",
+          "dataType": "sc:Text",
+          "name": "alias_id",
+          "source": {
+            "extract": {
+              "column": "alias_id"
+            },
+            "fileObject": {
+              "@id": "aliases.csv"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "dataType": "sc:Text",
+          "name": "form_id",
+          "source": {
+            "extract": {
+              "column": "form_id"
+            },
+            "fileObject": {
+              "@id": "aliases.csv"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "dataType": "sc:Text",
+          "name": "name_id",
+          "source": {
+            "extract": {
+              "column": "name_id"
+            },
+            "fileObject": {
+              "@id": "aliases.csv"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "dataType": "sc:Text",
+          "name": "alias",
+          "source": {
+            "extract": {
+              "column": "alias"
+            },
+            "fileObject": {
+              "@id": "aliases.csv"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "dataType": "sc:Text",
+          "name": "script",
+          "source": {
+            "extract": {
+              "column": "script"
+            },
+            "fileObject": {
+              "@id": "aliases.csv"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "dataType": "sc:Text",
+          "name": "language_tag",
+          "source": {
+            "extract": {
+              "column": "language_tag"
+            },
+            "fileObject": {
+              "@id": "aliases.csv"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "dataType": "sc:Text",
+          "name": "alias_type",
+          "source": {
+            "extract": {
+              "column": "alias_type"
+            },
+            "fileObject": {
+              "@id": "aliases.csv"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "dataType": "sc:Text",
+          "name": "method",
+          "source": {
+            "extract": {
+              "column": "method"
+            },
+            "fileObject": {
+              "@id": "aliases.csv"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "dataType": "sc:Text",
+          "name": "confidence",
+          "source": {
+            "extract": {
+              "column": "confidence"
+            },
+            "fileObject": {
+              "@id": "aliases.csv"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "dataType": "sc:Text",
+          "name": "merge_policy",
+          "source": {
+            "extract": {
+              "column": "merge_policy"
+            },
+            "fileObject": {
+              "@id": "aliases.csv"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "dataType": "sc:Text",
+          "name": "source_id",
+          "source": {
+            "extract": {
+              "column": "source_id"
+            },
+            "fileObject": {
+              "@id": "aliases.csv"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "dataType": "sc:Text",
+          "name": "rule_id",
+          "source": {
+            "extract": {
+              "column": "rule_id"
+            },
+            "fileObject": {
+              "@id": "aliases.csv"
+            }
+          }
+        }
+      ],
+      "name": "aliases"
+    }
+  ],
+  "url": "https://github.com/SamyRai/tatar-names/releases/tag/v0.1.0"
 }
