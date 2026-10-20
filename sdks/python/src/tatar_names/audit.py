@@ -104,16 +104,16 @@ def analyze_patterns(
 
     relation_counts = Counter(row["relation"] for row in relations)
     review_counts = Counter(row["queue_reason"] for row in review_queue)
+    # One pass over relations, then membership checks: a per-identity scan of
+    # all relations is quadratic and dominates analyze_patterns runtime.
+    covered_name_ids: set[str] = set()
+    for relation in relations:
+        if relation["left_kind"] == "name":
+            covered_name_ids.add(relation["left_id"])
+        if relation["right_kind"] == "name":
+            covered_name_ids.add(relation["right_id"])
     names_without_relations = sorted(
-        row["name_id"]
-        for row in identities
-        if not any(
-            relation["left_kind"] == "name"
-            and relation["left_id"] == row["name_id"]
-            or relation["right_kind"] == "name"
-            and relation["right_id"] == row["name_id"]
-            for relation in relations
-        )
+        row["name_id"] for row in identities if row["name_id"] not in covered_name_ids
     )
     names_missing_primary = sorted(
         row["name_id"]
