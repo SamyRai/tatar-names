@@ -2,10 +2,13 @@ from __future__ import annotations
 
 import csv
 from dataclasses import dataclass
+from functools import lru_cache
 from pathlib import Path
+from types import MappingProxyType
+from typing import Mapping
 
 from . import normalize
-from .data import release_path
+from .data import default_release_dir, release_path
 
 
 @dataclass(frozen=True)
@@ -84,10 +87,43 @@ def _relations_by_name(data_dir: str | Path | None = None) -> dict[str, list[dic
     return relations
 
 
+@dataclass(frozen=True)
+class ResolverSnapshot:
+    """Immutable, fully-materialized lookup structures for one release dir."""
+
+    forms_by_key: Mapping[str, tuple[Form, ...]]
+    alias_forms_by_key: Mapping[str, tuple[Form, ...]]
+    identities_by_id: Mapping[str, Mapping[str, str]]
+    relations_by_name: Mapping[str, tuple[Mapping[str, str], ...]]
+
+
+def _release_dir(data_dir: str | Path | None) -> Path:
+    return Path(data_dir) if data_dir is not None else default_release_dir()
+
+
+# Keyed by the resolved release directory path, not table content: edits to
+# the CSVs under an already-seen path stay invisible until clear_resolver_cache().
+@lru_cache(maxsize=None)
+def _snapshot_for(release_dir: Path) -> ResolverSnapshot:
+    return ResolverSnapshot(
+        forms_by_key=MappingProxyType({key: tuple(rows) for key, rows in _forms_by_key(release_dir).items()}),
+        alias_forms_by_key=MappingProxyType({key: tuple(rows) for key, rows in _aliases_by_key(release_dir).items()}),
+        identities_by_id=MappingProxyType(dict(_identities_by_id(release_dir))),
+        relations_by_name=MappingProxyType(
+            {key: tuple(rows) for key, rows in _relations_by_name(release_dir).items()}
+        ),
+    )
+
+
+def clear_resolver_cache() -> None:
+    """Drop all cached snapshots so subsequent resolve() calls re-read the tables."""
+    _snapshot_for.cache_clear()
+
+
 def _match_type(form: Form) -> str:
     if form.form_role in {"official_tt", "official_ru_or_russified_primary"}:
         return "official_form"
-    if form.form_role in {"tt_latin_transliteration", "passport_latin", "transliteration", "passport_latin"}:
+    if form.form_role in {"tt_latin_transliteration", "passport_latin"}:
         return "script_variant"
     if form.merge_policy == "candidate_only":
         return "candidate_only"
@@ -100,34 +136,33 @@ MERGE_ADVISORY = (
 )
 
 
-def _score(form: Form, query: str) -> tuple[int, float, int]:
-    exact_bonus = 1 if normalize.safe(form.form) == normalize.safe(query) else 0
+def _score(form: Form) -> tuple[float, int]:
+    # Every candidate form shares the query's normalized key by construction,
+    # so the former exact_bonus was equal across all candidates and dropping
+    # it leaves the (confidence, merge_bonus) ordering unchanged.
     merge_bonus = 1 if form.merge_policy == "auto_merge" else 0
-    return (exact_bonus, form.confidence, merge_bonus)
+    return (form.confidence, merge_bonus)
 
 
 def resolve(value: str, data_dir: str | Path | None = None) -> dict[str, object]:
     key = normalize.safe(value)
-    forms_by_key = _forms_by_key(data_dir)
-    alias_forms = _aliases_by_key(data_dir)
-    identities = _identities_by_id(data_dir)
-    relations_by_name = _relations_by_name(data_dir)
+    snapshot = _snapshot_for(_release_dir(data_dir))
 
-    matched_forms = list(forms_by_key.get(key, []))
+    matched_forms = list(snapshot.forms_by_key.get(key, ()))
     if not matched_forms:
-        matched_forms = list(alias_forms.get(key, []))
+        matched_forms = list(snapshot.alias_forms_by_key.get(key, ()))
 
     by_name: dict[str, Form] = {}
     for form in matched_forms:
         best = by_name.get(form.name_id)
-        if best is None or _score(form, value) > _score(best, value):
+        if best is None or _score(form) > _score(best):
             by_name[form.name_id] = form
 
-    ordered_forms = sorted(by_name.values(), key=lambda row: _score(row, value), reverse=True)
+    ordered_forms = sorted(by_name.values(), key=_score, reverse=True)
 
     candidates: list[dict[str, object]] = []
     for form in ordered_forms:
-        name = identities.get(form.name_id, {})
+        name = snapshot.identities_by_id.get(form.name_id, {})
         candidates.append(
             {
                 "name_id": form.name_id,
@@ -145,11 +180,11 @@ def resolve(value: str, data_dir: str | Path | None = None) -> dict[str, object]
     near_misses: list[dict[str, object]] = []
     relation_warnings: list[dict[str, object]] = []
     if best_match:
-        for relation in relations_by_name.get(best_match["name_id"], []):
+        for relation in snapshot.relations_by_name.get(best_match["name_id"], ()):
             if relation["relation"] != "near_confusable_but_distinct":
                 continue
             other_name_id = relation["right_id"] if relation["left_id"] == best_match["name_id"] else relation["left_id"]
-            other_name = identities.get(other_name_id, {})
+            other_name = snapshot.identities_by_id.get(other_name_id, {})
             warning = {
                 "relation": relation["relation"],
                 "other_name_id": other_name_id,

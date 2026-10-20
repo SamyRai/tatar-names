@@ -5,9 +5,9 @@ Run from sdks/python:
     uv run python benchmarks/bench_baseline.py [--skip-scan]
 
 Records row counts, SHA-256 hashes of every source and release table, and
-timings for the known hot paths (cold resolve, the alias branch, and the
-relation-coverage scan). Output is a single JSON object so runs stay
-diffable across commits.
+timings for the known hot paths (cold first resolve including the one-time
+snapshot build, warm exact and alias lookups, and the relation-coverage
+scan). Output is a single JSON object so runs stay diffable across commits.
 """
 
 from __future__ import annotations
@@ -16,6 +16,7 @@ import argparse
 import csv
 import hashlib
 import json
+import math
 import platform
 import statistics
 import sys
@@ -57,27 +58,43 @@ def first_alias_query() -> str:
     return "Гүзәл"
 
 
+def _percentile(values: list[float], fraction: float) -> float:
+    ordered = sorted(values)
+    index = min(len(ordered) - 1, max(0, math.ceil(fraction * len(ordered)) - 1))
+    return ordered[index]
+
+
 def timed_resolve(samples: int, alias_query: str) -> dict[str, float | int | str]:
-    # Each resolve() call re-reads every release table today; sample exact and
-    # alias-branch behaviour separately so the index work has an honest
-    # before/after on the same query shapes.
-    exact: list[float] = []
-    for _ in range(samples):
+    # resolve() builds its release snapshot once per data_dir. The cold call
+    # below pays the one-time CSV read; the warm samples (max(20, samples))
+    # measure steady-state lookup cost on the same query shapes as before.
+    warm_samples = max(20, samples)
+    resolve.clear_resolver_cache()
+    start = time.perf_counter()
+    result = resolve.resolve("Гүзәл")
+    cold_seconds = time.perf_counter() - start
+
+    exact = []
+    for _ in range(warm_samples):
         start = time.perf_counter()
-        result = resolve.resolve("Гүзәл")
+        resolve.resolve("Гүзәл")
         exact.append(time.perf_counter() - start)
-    alias_branch: list[float] = []
-    for _ in range(samples):
+    alias_branch = []
+    for _ in range(warm_samples):
         start = time.perf_counter()
         resolve.resolve(alias_query)
         alias_branch.append(time.perf_counter() - start)
     return {
-        "samples": samples,
+        "samples": warm_samples,
         "exact_query": "Гүзәл",
         "alias_query": alias_query,
-        "exact_seconds_median": round(statistics.median(exact), 4),
-        "exact_seconds_max": round(max(exact), 4),
-        "alias_seconds_median": round(statistics.median(alias_branch), 4),
+        "cold_first_call_seconds": round(cold_seconds, 4),
+        "warm_exact_seconds_p50": round(statistics.median(exact), 6),
+        "warm_exact_seconds_p95": round(_percentile(exact, 0.95), 6),
+        "warm_exact_seconds_max": round(max(exact), 6),
+        "warm_alias_seconds_p50": round(statistics.median(alias_branch), 6),
+        "warm_alias_seconds_p95": round(_percentile(alias_branch, 0.95), 6),
+        "warm_alias_seconds_max": round(max(alias_branch), 6),
         "exact_candidate_rows": len(result["candidates"]),
     }
 
