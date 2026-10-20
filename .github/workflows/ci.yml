@@ -37,3 +37,8 @@ jobs:
 
       - name: Build package
         run: uv build
+
+      - name: Validate dataset metadata
+        # The sync step above installs the metadata group; --no-sync keeps the
+        # validators available and the command itself skips cleanly without them.
+        run: uv run --no-sync python -m tatar_names.metadata --validate

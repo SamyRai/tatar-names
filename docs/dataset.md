@@ -76,8 +76,8 @@ Closeness levels used by the release model:
 
 The Python SDK build command validates the source and release CSVs and refreshes release metadata files such as:
 
-- `data/release/datapackage.json`
-- `data/release/croissant.json`
+- `data/release/datapackage.json`, a Data Package v2 descriptor whose resources reference the Table Schemas in `schemas/tableschema/` by release-tag URI
+- `data/release/croissant.json`, a Croissant 1.1 description whose release-time facts (publication date and download URLs) are pinned when a release is cut
 
 ## Recommended Use Pattern
 
