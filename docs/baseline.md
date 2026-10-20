@@ -20,7 +20,7 @@ uv run pytest  # wall time, see below
 | `resolve()` exact query, max | 1.12 s |
 | `resolve()` alias branch, median of 3 | 1.20 s |
 | Relation-coverage scan (identities × relations) | 68.0 s standalone |
-| `pytest` full suite (23 tests) | recorded in the table below on each run |
+| `pytest` full suite (23 tests) | 85 s |
 
 Every `resolve()` call re-parses all release tables (~224k rows / ~30 MB); the
 index work planned for the resolver phase targets warm steady-state p95 < 10 ms
