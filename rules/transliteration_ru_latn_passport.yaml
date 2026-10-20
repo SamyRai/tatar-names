@@ -1,4 +1,4 @@
-version: "0.1.0"
+version: "0.1.1"
 description: "Russian Cyrillic to Latin candidate-generation map."
 map:
   а: a
@@ -28,7 +28,7 @@ map:
   ч: ch
   ш: sh
   щ: shch
-  ъ: ""
+  ъ: ie
   ы: y
   ь: ""
   э: e
