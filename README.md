@@ -34,7 +34,7 @@ The repository is organized around curated source tables, generated release arti
 - `data/release/`: generated clean release CSV tables.
 - `sdks/python/src/tatar_names/`: normalization, transliteration, audit, and relation-aware resolution helpers.
 - `schemas/`: JSON Schema contracts for source and release tables.
-- `rules/`: normalization and transliteration rule tables used by the SDK.
+- `sdks/python/src/tatar_names/rules/`: normalization and transliteration rule tables, bundled into the installed package.
 - `docs/`: dataset, normalization, transliteration, and limitations documentation.
 
 ## Source Tables
