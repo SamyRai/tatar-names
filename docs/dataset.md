@@ -54,6 +54,10 @@ Key release semantics:
   - `review_required`
 - `relation` is descriptive evidence, not by itself permission to merge.
 
+### Relation ID stability
+
+`relation_id` values are derived from relation content (the sorted endpoint pair, the relation type, and the evidence type), not from row position. The same relation content produces the same id in every build regardless of source ordering, so dataset version diffs show real content changes instead of renumbering. When two distinct relations truncate to the same 7-digit value, ids are resolved deterministically; a repeated assertion of identical relation content is collapsed, and conflicting content for the same relation fails the build.
+
 `review_queue.csv` rows carry a `queue_reason` from a closed set:
 
 - `weak_evidence_form`: a released form whose evidence is thin (merge policy `candidate_only` or `review_required`).

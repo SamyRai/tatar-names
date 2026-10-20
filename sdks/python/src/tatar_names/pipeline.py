@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import csv
+import hashlib
 import json
 import re
 from collections import defaultdict
@@ -199,6 +200,59 @@ def _relation_kind_for_form(form_row: dict[str, str], identity: dict[str, str]) 
     return "review_candidate"
 
 
+# relations.schema.json constrains relation_id to ^rel_[0-9]{7}$, so content ids are
+# a sha256 digest truncated into that exact 7-decimal-digit space.
+RELATION_ID_MODULUS = 10_000_000
+
+
+def _relation_canonical_key(
+    left_kind: str,
+    left_id: str,
+    right_kind: str,
+    right_id: str,
+    relation: str,
+    evidence_type: str,
+) -> str:
+    endpoints = sorted([(left_kind, left_id), (right_kind, right_id)])
+    return json.dumps([endpoints[0], endpoints[1], relation, evidence_type], ensure_ascii=False, separators=(",", ":"))
+
+
+def _relation_base_digest(canonical_key: str) -> int:
+    return int(hashlib.sha256(canonical_key.encode("utf-8")).hexdigest(), 16) % RELATION_ID_MODULUS
+
+
+def _record_relation_payload(store: dict[str, dict[str, str]], canonical_key: str, payload: dict[str, str]) -> None:
+    existing = store.get(canonical_key)
+    if existing is None:
+        store[canonical_key] = payload
+        return
+    if existing != payload:
+        raise ValueError(
+            "conflicting duplicate relation content:\n"
+            f"- {json.dumps(existing, ensure_ascii=False, sort_keys=True)}\n"
+            f"- {json.dumps(payload, ensure_ascii=False, sort_keys=True)}"
+        )
+    # Identical re-assertion of the same relation: dedup.
+
+
+def _assign_relation_ids(store: dict[str, dict[str, str]]) -> list[dict[str, str]]:
+    # Distinct contents that truncate to the same 7-digit value are resolved by
+    # linear probing in canonical-key order, so ids depend only on the set of
+    # relation contents, never on insertion or row order.
+    if len(store) > RELATION_ID_MODULUS:
+        raise ValueError("relation id space exhausted: too many distinct relations")
+    assigned: list[dict[str, str]] = []
+    used: set[int] = set()
+    for canonical_key in sorted(store):
+        slot = _relation_base_digest(canonical_key)
+        while slot in used:
+            slot = (slot + 1) % RELATION_ID_MODULUS
+        used.add(slot)
+        assigned.append({"relation_id": f"rel_{slot:07d}", **store[canonical_key]})
+    assigned.sort(key=lambda row: row["relation_id"])
+    return assigned
+
+
 def validate_source(data_dir: str | Path | None = None) -> list[str]:
     base = Path(data_dir) if data_dir is not None else default_source_dir()
     errors: list[str] = []
@@ -389,8 +443,7 @@ def build_release_rows(source_dir: str | Path | None = None) -> dict[str, list[d
     for row in forms_rows:
         forms_by_name[row["name_id"]].append(row)
 
-    relations_rows: list[dict[str, str]] = []
-    relation_index = 1
+    relations_by_canonical: dict[str, dict[str, str]] = {}
 
     def add_relation(
         left_kind: str,
@@ -405,10 +458,11 @@ def build_release_rows(source_dir: str | Path | None = None) -> dict[str, list[d
         evidence_id: str,
         notes: str,
     ) -> None:
-        nonlocal relation_index
-        relations_rows.append(
+        canonical_key = _relation_canonical_key(left_kind, left_id, right_kind, right_id, relation, evidence_type)
+        _record_relation_payload(
+            relations_by_canonical,
+            canonical_key,
             {
-                "relation_id": f"rel_{relation_index:07d}",
                 "left_kind": left_kind,
                 "left_id": left_id,
                 "right_kind": right_kind,
@@ -420,9 +474,8 @@ def build_release_rows(source_dir: str | Path | None = None) -> dict[str, list[d
                 "source_id": source_id,
                 "evidence_id": evidence_id,
                 "notes": notes,
-            }
+            },
         )
-        relation_index += 1
 
     identity_by_id = {row["name_id"]: row for row in identities_rows}
     for form_row in forms_rows:
@@ -567,7 +620,7 @@ def build_release_rows(source_dir: str | Path | None = None) -> dict[str, list[d
     for index, row in enumerate(aliases_rows, start=1):
         row["alias_id"] = f"a_{index:07d}"
 
-    relations_rows.sort(key=lambda row: row["relation_id"])
+    relations_rows = _assign_relation_ids(relations_by_canonical)
     review_rows.sort(key=lambda row: row["review_id"])
     return {
         "identities": identities_rows,
