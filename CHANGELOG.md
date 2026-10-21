@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.2.0 — 2026-10-21
 
 - Correctness: patronymic stems follow the standard soft-stem rule for -ий bases (Юрий → Юрьевич) with Latin derivation kept in parity; all-caps transliteration renders multi-letter maps uppercase (ЦАРЕВ → TSAREV); the passport map transliterates ъ as `ie` (ICAO Doc 9303 Part 3); `validate_source` reports unknown attestation entities instead of crashing.
 - Data safety: exact spellings attested for several identities and superseded supporting attestations are now preserved as review-queue rows instead of being silently dropped (review_queue grew 6,951 → 18,242 rows; forms/relations/identities content unchanged).
