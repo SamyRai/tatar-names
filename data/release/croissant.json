@@ -61,14 +61,14 @@
     "@type": "Person",
     "name": "Damir Mukimov"
   },
-  "datePublished": "1970-01-01T00:00:00Z",
+  "datePublished": "2026-10-21T13:13:26Z",
   "description": "Tatar Names is a source-first dataset for auditable Tatar, Russian, and Latin name matching.",
   "distribution": [
     {
       "@id": "identities.csv",
       "@type": "cr:FileObject",
       "contentSize": "2228128 B",
-      "contentUrl": "https://github.com/SamyRai/tatar-names/releases/tag/v0.1.0/identities.csv",
+      "contentUrl": "https://github.com/SamyRai/tatar-names/releases/tag/v0.2.0/identities.csv",
       "encodingFormat": "text/csv",
       "name": "identities.csv",
       "sha256": "827572d778e2002ab38a2415a4dbb9fce595367601d511e804716a2934762b2b"
@@ -77,7 +77,7 @@
       "@id": "forms.csv",
       "@type": "cr:FileObject",
       "contentSize": "7425877 B",
-      "contentUrl": "https://github.com/SamyRai/tatar-names/releases/tag/v0.1.0/forms.csv",
+      "contentUrl": "https://github.com/SamyRai/tatar-names/releases/tag/v0.2.0/forms.csv",
       "encodingFormat": "text/csv",
       "name": "forms.csv",
       "sha256": "a215e7a6edbac835dfc17d695196c25d71c3143068f47b35c872e7c48558d013"
@@ -86,7 +86,7 @@
       "@id": "relations.csv",
       "@type": "cr:FileObject",
       "contentSize": "22759080 B",
-      "contentUrl": "https://github.com/SamyRai/tatar-names/releases/tag/v0.1.0/relations.csv",
+      "contentUrl": "https://github.com/SamyRai/tatar-names/releases/tag/v0.2.0/relations.csv",
       "encodingFormat": "text/csv",
       "name": "relations.csv",
       "sha256": "c13b344cc805e4921da00468dc1533be6a8cdd3b1f4f5d40d7ad2ebf6f28c4ca"
@@ -95,7 +95,7 @@
       "@id": "review_queue.csv",
       "@type": "cr:FileObject",
       "contentSize": "2305646 B",
-      "contentUrl": "https://github.com/SamyRai/tatar-names/releases/tag/v0.1.0/review_queue.csv",
+      "contentUrl": "https://github.com/SamyRai/tatar-names/releases/tag/v0.2.0/review_queue.csv",
       "encodingFormat": "text/csv",
       "name": "review_queue.csv",
       "sha256": "7ecd3c98d11e6b18c729f68e042bb081f7cc5389685af8e090be24bbfcb36dc5"
@@ -104,7 +104,7 @@
       "@id": "aliases.csv",
       "@type": "cr:FileObject",
       "contentSize": "1182 B",
-      "contentUrl": "https://github.com/SamyRai/tatar-names/releases/tag/v0.1.0/aliases.csv",
+      "contentUrl": "https://github.com/SamyRai/tatar-names/releases/tag/v0.2.0/aliases.csv",
       "encodingFormat": "text/csv",
       "name": "aliases.csv",
       "sha256": "79cc2a49c0651d4a6243596427ae2d4f9c2ba7b4e82ebaacf702d9e0679dc55b"
@@ -936,5 +936,5 @@
       "name": "aliases"
     }
   ],
-  "url": "https://github.com/SamyRai/tatar-names/releases/tag/v0.1.0"
+  "url": "https://github.com/SamyRai/tatar-names/releases/tag/v0.2.0"
 }

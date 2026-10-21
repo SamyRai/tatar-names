@@ -15,7 +15,7 @@
       "mediatype": "text/csv",
       "name": "identities",
       "path": "identities.csv",
-      "schema": "https://raw.githubusercontent.com/SamyRai/tatar-names/v0.1.0/schemas/tableschema/identities.tableschema.json"
+      "schema": "https://raw.githubusercontent.com/SamyRai/tatar-names/v0.2.0/schemas/tableschema/identities.tableschema.json"
     },
     {
       "encoding": "utf-8",
@@ -23,7 +23,7 @@
       "mediatype": "text/csv",
       "name": "forms",
       "path": "forms.csv",
-      "schema": "https://raw.githubusercontent.com/SamyRai/tatar-names/v0.1.0/schemas/tableschema/forms.tableschema.json"
+      "schema": "https://raw.githubusercontent.com/SamyRai/tatar-names/v0.2.0/schemas/tableschema/forms.tableschema.json"
     },
     {
       "encoding": "utf-8",
@@ -31,7 +31,7 @@
       "mediatype": "text/csv",
       "name": "relations",
       "path": "relations.csv",
-      "schema": "https://raw.githubusercontent.com/SamyRai/tatar-names/v0.1.0/schemas/tableschema/relations.tableschema.json"
+      "schema": "https://raw.githubusercontent.com/SamyRai/tatar-names/v0.2.0/schemas/tableschema/relations.tableschema.json"
     },
     {
       "encoding": "utf-8",
@@ -39,7 +39,7 @@
       "mediatype": "text/csv",
       "name": "review_queue",
       "path": "review_queue.csv",
-      "schema": "https://raw.githubusercontent.com/SamyRai/tatar-names/v0.1.0/schemas/tableschema/review_queue.tableschema.json"
+      "schema": "https://raw.githubusercontent.com/SamyRai/tatar-names/v0.2.0/schemas/tableschema/review_queue.tableschema.json"
     },
     {
       "encoding": "utf-8",
@@ -47,7 +47,7 @@
       "mediatype": "text/csv",
       "name": "aliases",
       "path": "aliases.csv",
-      "schema": "https://raw.githubusercontent.com/SamyRai/tatar-names/v0.1.0/schemas/tableschema/aliases.tableschema.json"
+      "schema": "https://raw.githubusercontent.com/SamyRai/tatar-names/v0.2.0/schemas/tableschema/aliases.tableschema.json"
     }
   ],
   "title": "Tatar Names"

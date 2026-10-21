@@ -1,6 +1,6 @@
 [project]
 name = "tatar-names"
-version = "0.1.0"
+version = "0.2.0"
 description = "Open Tatar/Russian/Latin name forms and a small resolver toolkit."
 authors = [
     { name = "Damir Mukimov", email = "mukimov.d@gmail.com" }
