@@ -19,11 +19,29 @@
     "merge_policy"
   ],
   "properties": {
-    "form_id": { "type": "string", "pattern": "^f_[0-9]{7}$" },
-    "name_id": { "type": "string", "pattern": "^ttn_[0-9]{6}$" },
-    "form": { "type": "string", "minLength": 1 },
-    "script": { "type": "string", "enum": ["Cyrl", "Latn"] },
-    "language_tag": { "type": "string", "minLength": 1 },
+    "form_id": {
+      "type": "string",
+      "pattern": "^f_[0-9]{7}$"
+    },
+    "name_id": {
+      "type": "string",
+      "pattern": "^ttn_[0-9]{6}$"
+    },
+    "form": {
+      "type": "string",
+      "minLength": 1
+    },
+    "script": {
+      "type": "string",
+      "enum": [
+        "Cyrl",
+        "Latn"
+      ]
+    },
+    "language_tag": {
+      "type": "string",
+      "minLength": 1
+    },
     "form_role": {
       "type": "string",
       "enum": [
@@ -34,7 +52,15 @@
         "common_observed"
       ]
     },
-    "identity_status": { "type": "string", "enum": ["canonical", "variant", "alias"] },
+    "identity_status": {
+      "type": "string",
+      "enum": [
+        "canonical",
+        "variant",
+        "alias",
+        "ambiguous_candidate"
+      ]
+    },
     "profile": {
       "type": "string",
       "enum": [
@@ -45,12 +71,25 @@
         "common_variant"
       ]
     },
-    "confidence": { "type": "string", "pattern": "^(0(\\.\\d+)?|1(\\.0+)?)$" },
-    "source_id": { "type": "string", "minLength": 1 },
-    "evidence_id": { "type": "string" },
+    "confidence": {
+      "type": "string",
+      "pattern": "^(0(\\.\\d+)?|1(\\.0+)?)$"
+    },
+    "source_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "evidence_id": {
+      "type": "string"
+    },
     "merge_policy": {
       "type": "string",
-      "enum": ["auto_merge", "candidate_only", "never_merge", "review_required"]
+      "enum": [
+        "auto_merge",
+        "candidate_only",
+        "never_merge",
+        "review_required"
+      ]
     }
   }
 }

@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
 from tatar_names import resolve
 
 # Fixture captured verbatim: two identities share the normalized form key
@@ -207,3 +209,115 @@ def test_alias_fallback_query_result_is_unchanged(tmp_path: Path) -> None:
         "merge_recommendation": "review_required",
         "advisory": ADVISORY,
     }
+
+
+def test_lookup_reports_ambiguous_for_shared_spelling(tmp_path: Path) -> None:
+    resolver = resolve.Resolver.from_path(_fixture_release(tmp_path))
+
+    result = resolver.lookup("Айко")
+
+    assert result.status == resolve.LOOKUP_AMBIGUOUS
+    assert [candidate.name_id for candidate in result.candidates] == ["ttn_000002", "ttn_000001"]
+    assert result.candidates[0].matched_form_id == "f_0000002"
+    assert result.candidates[0].entity_type == "given"
+    assert result.candidates[0].script == "Cyrl"
+    assert "near_confusable_but_distinct" in result.candidates[0].warnings
+    assert result.merge_recommendation == "review_required"
+
+
+def test_lookup_reports_unique_candidate(tmp_path: Path) -> None:
+    resolver = resolve.Resolver.from_path(_fixture_release(tmp_path))
+
+    result = resolver.lookup("Aiko")
+
+    assert result.status == resolve.LOOKUP_UNIQUE_CANDIDATE
+    assert [candidate.name_id for candidate in result.candidates] == ["ttn_000001"]
+    assert result.candidates[0].matched_form_id == "f_0000003"
+    assert result.candidates[0].language_tag == "ru-Latn"
+    # ttn_000001 carries a near-confusable hard negative, so even an exact
+    # auto-merge form match stays on review_required.
+    assert result.merge_recommendation == "review_required"
+
+
+def test_lookup_not_found(tmp_path: Path) -> None:
+    resolver = resolve.Resolver.from_path(_fixture_release(tmp_path))
+
+    result = resolver.lookup("Йок")
+
+    assert result.status == resolve.LOOKUP_NOT_FOUND
+    assert result.candidates == ()
+    assert result.merge_recommendation == "no_match"
+    assert result.advisory == ADVISORY
+
+
+def test_lookup_entity_type_filter_empty_is_not_found(tmp_path: Path) -> None:
+    resolver = resolve.Resolver.from_path(_fixture_release(tmp_path))
+
+    result = resolver.lookup("Айко", entity_type="surname")
+
+    assert result.status == resolve.LOOKUP_NOT_FOUND
+
+
+def test_lookup_language_hint_narrows_but_never_picks(tmp_path: Path) -> None:
+    resolver = resolve.Resolver.from_path(_fixture_release(tmp_path))
+
+    cyrillic = resolver.lookup("Айко", language_hint="Cyrl")
+    assert cyrillic.status == resolve.LOOKUP_AMBIGUOUS
+
+    latin = resolver.lookup("Айко", language_hint="Latn")
+    assert latin.status == resolve.LOOKUP_NOT_FOUND
+
+
+def test_lookup_canonical_mode_skips_normalization(tmp_path: Path) -> None:
+    resolver = resolve.Resolver.from_path(_fixture_release(tmp_path))
+
+    assert resolver.lookup("айко").status == resolve.LOOKUP_AMBIGUOUS
+    assert resolver.lookup("айко", mode="canonical").status == resolve.LOOKUP_NOT_FOUND
+
+
+def test_lookup_rejects_unknown_mode(tmp_path: Path) -> None:
+    resolver = resolve.Resolver.from_path(_fixture_release(tmp_path))
+
+    with pytest.raises(ValueError):
+        resolver.lookup("Айко", mode="fuzzy")
+
+
+def test_lookup_alias_fallback_reports_unique(tmp_path: Path) -> None:
+    resolver = resolve.Resolver.from_path(_fixture_release(tmp_path))
+
+    result = resolver.lookup("Айчка")
+
+    assert result.status == resolve.LOOKUP_UNIQUE_CANDIDATE
+    assert result.candidates[0].name_id == "ttn_000001"
+    assert result.candidates[0].matched_form == "Айчка"
+    assert result.candidates[0].matched_form_id == "f_0000001"
+
+
+def test_lookup_hint_and_entity_type_narrow_ambiguous_to_unique(tmp_path: Path) -> None:
+    release = tmp_path / "release"
+    release.mkdir()
+    (release / "identities.csv").write_text(
+        "name_id,entity_type,gender,canonical_tt_cyrl,canonical_ru_cyrl,canonical_tt_latn,canonical_ru_latn,source_id,source_row,status,notes\n"
+        "ttn_000001,given,male,Өлфәт,Ульфат,Ulfat,Ulfat,test,1,canonical,\n"
+        "ttn_000002,surname,female,Өлфәт,Ульфат,Ulfat,Ulfat,test,2,canonical,\n",
+        encoding="utf-8",
+    )
+    (release / "forms.csv").write_text(
+        "form_id,name_id,form,script,language_tag,form_role,identity_status,profile,confidence,source_id,evidence_id,merge_policy\n"
+        "f_0000001,ttn_000001,Өлфәт,Cyrl,tt-Cyrl,official_tt,ambiguous_candidate,tt_original,0.90,test,ev_1,review_required\n"
+        "f_0000002,ttn_000002,Өлфәт,Cyrl,ru-Cyrl,official_ru_or_russified_primary,ambiguous_candidate,ru_adaptation,0.90,test,ev_2,review_required\n",
+        encoding="utf-8",
+    )
+    resolver = resolve.Resolver.from_path(release)
+
+    ambiguous = resolver.lookup("Өлфәт")
+    assert ambiguous.status == resolve.LOOKUP_AMBIGUOUS
+
+    hinted = resolver.lookup("Өлфәт", language_hint="tt-Cyrl")
+    assert hinted.status == resolve.LOOKUP_UNIQUE_CANDIDATE
+    assert hinted.candidates[0].name_id == "ttn_000001"
+
+    by_entity = resolver.lookup("Өлфәт", entity_type="surname")
+    assert by_entity.status == resolve.LOOKUP_UNIQUE_CANDIDATE
+    assert by_entity.candidates[0].name_id == "ttn_000002"
+    assert by_entity.merge_recommendation == "review_required"

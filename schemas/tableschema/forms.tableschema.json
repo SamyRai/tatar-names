@@ -65,7 +65,8 @@
         "enum": [
           "canonical",
           "variant",
-          "alias"
+          "alias",
+          "ambiguous_candidate"
         ]
       }
     },

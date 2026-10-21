@@ -146,7 +146,7 @@ def test_validate_source_reports_unknown_entity_without_crashing(tmp_path: Path)
     assert errors == ["attestation at_0000002 references unknown entity_id ttn_999999"]
 
 
-def test_build_release_rows_routes_shared_spelling_group_to_review(tmp_path: Path) -> None:
+def test_build_release_rows_emits_shared_spelling_candidates(tmp_path: Path) -> None:
     source_dir = make_source_dir(
         tmp_path,
         [
@@ -161,7 +161,14 @@ def test_build_release_rows_routes_shared_spelling_group_to_review(tmp_path: Pat
 
     rows = build_release_rows(source_dir)
 
-    assert rows["forms"] == []
+    forms = {row["form_id"]: row for row in rows["forms"]}
+    assert set(forms) == {"f_0000001", "f_0000002"}
+    assert forms["f_0000001"]["name_id"] == "ttn_000001"
+    assert forms["f_0000002"]["name_id"] == "ttn_000002"
+    for row in forms.values():
+        assert row["form"] == "Камал"
+        assert row["identity_status"] == "ambiguous_candidate"
+        assert row["merge_policy"] == "review_required"
     shared = [row for row in rows["review_queue"] if row["queue_reason"] == "shared_spelling_group"]
     assert {row["subject_id"] for row in shared} == {"at_0000001", "at_0000002"}
     assert {row["evidence_id"] for row in shared} == {"ev_0000001", "ev_0000002"}
@@ -207,3 +214,37 @@ def test_build_release_rows_keeps_superseded_attestation_evidence(tmp_path: Path
     assert row["evidence_id"] == "ev_0000002"
     assert "Акмал" in row["notes"]
     assert "superseded_by=at_0000001" in row["notes"]
+
+
+def test_build_release_rows_marks_normalized_shared_spelling_across_tags(tmp_path: Path) -> None:
+    # Same letters under different language tags share the resolver's
+    # normalized key, so both rows must be marked ambiguous even though no
+    # exact (form, script, language_tag) triple is shared.
+    source_dir = make_source_dir(
+        tmp_path,
+        [
+            entity_row("ttn_000001", "Алиш", "Alish", "ev_0000001"),
+            entity_row("ttn_000002", "Алишев", "Alishev", "ev_0000002"),
+        ],
+        [
+            attestation_row("at_0000001", "ttn_000001", "Алиш", "ev_0000001"),
+            attestation_row(
+                "at_0000002",
+                "ttn_000002",
+                "Алиш",
+                "ev_0000002",
+                language_tag="ru-Cyrl",
+                profile="ru_adaptation",
+            ),
+        ],
+    )
+
+    rows = build_release_rows(source_dir)
+
+    forms = {row["form_id"]: row for row in rows["forms"]}
+    assert set(forms) == {"f_0000001", "f_0000002"}
+    assert forms["f_0000001"]["script"] == "Cyrl" and forms["f_0000002"]["script"] == "Cyrl"
+    assert {forms["f_0000001"]["language_tag"], forms["f_0000002"]["language_tag"]} == {"tt-Cyrl", "ru-Cyrl"}
+    for row in forms.values():
+        assert row["identity_status"] == "ambiguous_candidate"
+        assert row["merge_policy"] == "review_required"
