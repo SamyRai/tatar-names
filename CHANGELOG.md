@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.2.0 — 2026-10-21
+## Unreleased
 
 - Ambiguity (TN-15, ADR-002/ADR-005): a spelling attested for several identities is now compiled as an explicit multi-candidate form set — every candidate is released with `identity_status=ambiguous_candidate` and `merge_policy=review_required` instead of the whole group being routed to review and dropped; `validate_release` enforces the marking in both directions (shared spellings must be marked, `ambiguous_candidate` must actually be shared).
 - Resolver API (TN-22): new `Resolver.from_package()` / `Resolver.from_path()` with `lookup(value, entity_type=..., language_hint=..., mode=...)` returning an explicit `not_found` / `unique_candidate` / `ambiguous` status. Each candidate carries the stable name id, matched form, script/language, entity type, match type, merge policy, source reference, and near-confusable warnings. Ambiguity is never resolved by ranking; hints narrow the candidate set and never pick a winner. The module-level `resolve()` keeps its previous output for existing release data as a compatibility adapter.
