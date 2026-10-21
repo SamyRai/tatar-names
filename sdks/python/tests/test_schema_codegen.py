@@ -77,7 +77,7 @@ def test_forms_table_schema_fields_and_constraints(outputs: dict[str, str]) -> N
                 "common_observed",
             ],
         },
-        "identity_status": {"required": True, "enum": ["canonical", "variant", "alias"]},
+        "identity_status": {"required": True, "enum": ["canonical", "variant", "alias", "ambiguous_candidate"]},
         "profile": {
             "required": True,
             "enum": [

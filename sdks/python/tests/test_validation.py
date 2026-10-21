@@ -2,6 +2,7 @@ import csv
 import shutil
 from pathlib import Path
 
+from tatar_names import normalize
 from tatar_names.cli.validate import validate_project
 from tatar_names.pipeline import build_release_rows, validate_release, validate_source
 
@@ -57,7 +58,7 @@ def test_validation_rejects_malformed_repetition_in_source(tmp_path: Path) -> No
     assert any("suspicious repetition" in error for error in validate_source(source_dir))
 
 
-def test_validation_rejects_ambiguous_release_form(tmp_path: Path) -> None:
+def test_validation_rejects_unmarked_shared_release_form(tmp_path: Path) -> None:
     _, release_dir = copy_dataset(tmp_path)
     rows = read_csv(release_dir / "forms.csv")
     target_index = next(index for index, row in enumerate(rows) if row["name_id"] != rows[0]["name_id"])
@@ -66,7 +67,78 @@ def test_validation_rejects_ambiguous_release_form(tmp_path: Path) -> None:
     rows[target_index]["language_tag"] = rows[0]["language_tag"]
     rewrite_csv(release_dir / "forms.csv", rows)
 
-    assert any("exact release form" in error for error in validate_release(release_dir))
+    assert any("shared release form" in error for error in validate_release(release_dir))
+
+
+def test_validation_accepts_marked_ambiguous_candidates(tmp_path: Path) -> None:
+    _, release_dir = copy_dataset(tmp_path)
+    rows = read_csv(release_dir / "forms.csv")
+    target_index = next(index for index, row in enumerate(rows) if row["name_id"] != rows[0]["name_id"])
+    rows[target_index]["form"] = rows[0]["form"]
+    rows[target_index]["script"] = rows[0]["script"]
+    rows[target_index]["language_tag"] = rows[0]["language_tag"]
+    shared_key = normalize.safe(rows[0]["form"])
+    for index, row in enumerate(rows):
+        if normalize.safe(row["form"]) == shared_key:
+            rows[index]["identity_status"] = "ambiguous_candidate"
+            rows[index]["merge_policy"] = "review_required"
+    rewrite_csv(release_dir / "forms.csv", rows)
+    demoted_ids = {row["form_id"] for row in rows if normalize.safe(row["form"]) == shared_key}
+    aliases = [row for row in read_csv(release_dir / "aliases.csv") if row["form_id"] not in demoted_ids]
+    rewrite_csv(release_dir / "aliases.csv", aliases)
+
+    errors = validate_release(release_dir)
+
+    assert not any("shared release form" in error for error in errors)
+    assert not any("single name" in error for error in errors)
+
+
+def test_validation_rejects_alias_referencing_ambiguous_form(tmp_path: Path) -> None:
+    _, release_dir = copy_dataset(tmp_path)
+    rows = read_csv(release_dir / "forms.csv")
+    target_index = next(index for index, row in enumerate(rows) if row["name_id"] != rows[0]["name_id"])
+    rows[target_index]["form"] = rows[0]["form"]
+    rows[target_index]["script"] = rows[0]["script"]
+    rows[target_index]["language_tag"] = rows[0]["language_tag"]
+    shared_key = normalize.safe(rows[0]["form"])
+    for index, row in enumerate(rows):
+        if normalize.safe(row["form"]) == shared_key:
+            rows[index]["identity_status"] = "ambiguous_candidate"
+            rows[index]["merge_policy"] = "review_required"
+    rewrite_csv(release_dir / "forms.csv", rows)
+
+    demoted = rows[0]
+    aliases = read_csv(release_dir / "aliases.csv")
+    aliases.append(
+        {
+            "alias_id": "a_9999999",
+            "form_id": demoted["form_id"],
+            "name_id": demoted["name_id"],
+            "alias": "Тестли",
+            "script": demoted["script"],
+            "language_tag": demoted["language_tag"],
+            "alias_type": "common_variant",
+            "method": "common_variant",
+            "confidence": "0.80",
+            "merge_policy": "review_required",
+            "source_id": demoted["source_id"],
+            "rule_id": "",
+        }
+    )
+    rewrite_csv(release_dir / "aliases.csv", aliases)
+
+    assert any(
+        "references ambiguous_candidate form" in error for error in validate_release(release_dir)
+    )
+
+
+def test_validation_rejects_lone_ambiguous_candidate(tmp_path: Path) -> None:
+    _, release_dir = copy_dataset(tmp_path)
+    rows = read_csv(release_dir / "forms.csv")
+    rows[0]["identity_status"] = "ambiguous_candidate"
+    rewrite_csv(release_dir / "forms.csv", rows)
+
+    assert any("single name" in error for error in validate_release(release_dir))
 
 
 def test_validation_rejects_cross_type_source_alias_candidate(tmp_path: Path) -> None:
@@ -155,3 +227,17 @@ def test_validation_rejects_auto_merge_on_hard_negative(tmp_path: Path) -> None:
     rewrite_csv(release_dir / "relations.csv", rows)
 
     assert any("cannot auto_merge near_confusable_but_distinct" in error for error in validate_release(release_dir))
+
+
+def test_validation_rejects_partially_marked_shared_group(tmp_path: Path) -> None:
+    _, release_dir = copy_dataset(tmp_path)
+    rows = read_csv(release_dir / "forms.csv")
+    target_index = next(index for index, row in enumerate(rows) if row["name_id"] != rows[0]["name_id"])
+    rows[target_index]["form"] = rows[0]["form"]
+    rows[target_index]["script"] = rows[0]["script"]
+    rows[target_index]["language_tag"] = rows[0]["language_tag"]
+    rows[0]["identity_status"] = "ambiguous_candidate"
+    rows[0]["merge_policy"] = "review_required"
+    rewrite_csv(release_dir / "forms.csv", rows)
+
+    assert any("must be ambiguous_candidate" in error for error in validate_release(release_dir))

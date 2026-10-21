@@ -2,6 +2,12 @@
 
 ## 0.2.0 — 2026-10-21
 
+- Ambiguity (TN-15, ADR-002/ADR-005): a spelling attested for several identities is now compiled as an explicit multi-candidate form set — every candidate is released with `identity_status=ambiguous_candidate` and `merge_policy=review_required` instead of the whole group being routed to review and dropped; `validate_release` enforces the marking in both directions (shared spellings must be marked, `ambiguous_candidate` must actually be shared).
+- Resolver API (TN-22): new `Resolver.from_package()` / `Resolver.from_path()` with `lookup(value, entity_type=..., language_hint=..., mode=...)` returning an explicit `not_found` / `unique_candidate` / `ambiguous` status. Each candidate carries the stable name id, matched form, script/language, entity type, match type, merge policy, source reference, and near-confusable warnings. Ambiguity is never resolved by ranking; hints narrow the candidate set and never pick a winner. The module-level `resolve()` keeps its previous output for existing release data as a compatibility adapter.
+- Compiler internals (TN-17): mechanically derived same-identity form-to-form edges remain in the `relations.csv` backward-compatible view but no longer enter the resolver's internal index, which now loads only independently evidenced relations.
+
+## 0.2.0 — 2026-10-21
+
 - Correctness: patronymic stems follow the standard soft-stem rule for -ий bases (Юрий → Юрьевич) with Latin derivation kept in parity; all-caps transliteration renders multi-letter maps uppercase (ЦАРЕВ → TSAREV); the passport map transliterates ъ as `ie` (ICAO Doc 9303 Part 3); `validate_source` reports unknown attestation entities instead of crashing.
 - Data safety: exact spellings attested for several identities and superseded supporting attestations are now preserved as review-queue rows instead of being silently dropped (review_queue grew 6,951 → 18,242 rows; forms/relations/identities content unchanged).
 - Contracts: the JSON Schemas are the single authority — Frictionless Table Schemas, the validation constants, and package metadata fields are generated from them (`python -m tatar_names.codegen`, drift-checked in CI); normalization levels (canonical / lookup / candidate-search) and transliteration profile contracts (purpose, lossiness, legal-authority) are explicit API.

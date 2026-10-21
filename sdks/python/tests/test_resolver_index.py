@@ -32,6 +32,7 @@ a_0000001,f_0000001,ttn_000001,Айчка,Cyrl,ru-Cyrl,common_variant,common_var
 RELATIONS = """relation_id,left_kind,left_id,right_kind,right_id,relation,merge_policy,confidence,evidence_type,source_id,evidence_id,notes
 rel_0000001,name,ttn_000001,name,ttn_000002,near_confusable_but_distinct,never_merge,0.90,manual,test,ev_r1,identical spelling distinct persons
 rel_0000002,name,ttn_000002,form,f_0000003,same_name_script_variant,auto_merge,0.95,manual,test,ev_r2,latin variant
+rel_0000003,name,ttn_000001,form,f_0000001,same_name_official_pair,auto_merge,0.95,derived_identity_graph,test,ev_r3,mechanical same-identity edge
 """
 
 
@@ -135,3 +136,18 @@ def test_unknown_data_dir_builds_its_own_snapshot(tmp_path: Path, monkeypatch: p
     assert second != first
     assert second["best_match"]["name_id"] == "ttn_000001"
     assert second["best_match"]["merge_policy"] == "never_merge"
+
+
+def test_snapshot_excludes_mechanically_derived_edges(tmp_path: Path) -> None:
+    release = _write_release(tmp_path)
+
+    snapshot = resolve._snapshot_for(release)
+
+    # TN-17: derived same-identity edges remain in relations.csv for
+    # consumers but never enter the internal lookup index.
+    assert set(snapshot.relations_by_name) == {"ttn_000001", "ttn_000002"}
+    assert all(
+        relation["evidence_type"] != "derived_identity_graph"
+        for rows in snapshot.relations_by_name.values()
+        for relation in rows
+    )

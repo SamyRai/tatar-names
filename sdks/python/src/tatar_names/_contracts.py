@@ -23,7 +23,7 @@ VALID_FORM_ROLES = {
     "passport_latin",
     "tt_latin_transliteration",
 }
-VALID_IDENTITY_STATUSES = {"alias", "canonical", "variant"}
+VALID_IDENTITY_STATUSES = {"alias", "ambiguous_candidate", "canonical", "variant"}
 VALID_MERGE_POLICIES = {"auto_merge", "candidate_only", "never_merge", "review_required"}
 VALID_RELATIONS = {
     "near_confusable_but_distinct",

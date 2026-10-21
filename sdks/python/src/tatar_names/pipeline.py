@@ -385,8 +385,14 @@ def build_release_rows(source_dir: str | Path | None = None) -> dict[str, list[d
 
     candidate_forms = [row for row in attestations if row["entity_id"] in entity_ids]
     exact_to_rows: dict[tuple[str, str, str], list[dict[str, str]]] = defaultdict(list)
+    normalized_key_to_entities: dict[str, set[str]] = defaultdict(set)
     for row in candidate_forms:
         exact_to_rows[(row["form"], row["script"], row["language_tag"])].append(row)
+        normalized_key_to_entities[normalize.safe(row["form"])].add(row["entity_id"])
+    # Sharing is decided at the resolver's own key level — normalize.safe(form),
+    # script- and tag-insensitive — so every row the resolver will see as one
+    # spelling is marked together (TN-15, ADR-005).
+    shared_keys = {key for key, entity_ids_for_key in normalized_key_to_entities.items() if len(entity_ids_for_key) > 1}
 
     review_rows: list[dict[str, str]] = []
     review_index = 1
@@ -417,33 +423,44 @@ def build_release_rows(source_dir: str | Path | None = None) -> dict[str, list[d
 
     forms_rows: list[dict[str, str]] = []
     for rows in exact_to_rows.values():
-        group_entity_ids = {row["entity_id"] for row in rows}
-        best = max(rows, key=_form_quality_key)
-        if len(group_entity_ids) > 1:
-            for row in rows:
+        rows_by_entity: dict[str, list[dict[str, str]]] = defaultdict(list)
+        for row in rows:
+            rows_by_entity[row["entity_id"]].append(row)
+        for entity_rows in rows_by_entity.values():
+            best = max(entity_rows, key=_form_quality_key)
+            for row in entity_rows:
+                if row is best:
+                    continue
                 add_review(
                     "form",
                     row["attestation_id"],
-                    "shared_spelling_group",
+                    "superseded_attestation",
                     "review_candidate",
                     row["source_id"],
                     row["evidence_id"],
-                    f"{row['form']} shared_by={', '.join(sorted(group_entity_ids))}",
+                    f"{row['form']} superseded_by={best['attestation_id']}",
                 )
-            continue
-        for row in rows:
-            if row is best:
+            key = normalize.safe(best["form"])
+            if key not in shared_keys:
+                forms_rows.append(_release_form_row(best))
                 continue
+            # ADR-002/ADR-005 (TN-15): a spelling attested for several
+            # identities is emitted as an explicit candidate for each of them
+            # instead of being dropped. Such a form can never authorize a merge
+            # on the spelling alone, so its policy is pinned to review_required.
+            candidate = _release_form_row(best)
+            candidate["identity_status"] = "ambiguous_candidate"
+            candidate["merge_policy"] = "review_required"
+            forms_rows.append(candidate)
             add_review(
                 "form",
-                row["attestation_id"],
-                "superseded_attestation",
+                best["attestation_id"],
+                "shared_spelling_group",
                 "review_candidate",
-                row["source_id"],
-                row["evidence_id"],
-                f"{row['form']} superseded_by={best['attestation_id']}",
+                best["source_id"],
+                best["evidence_id"],
+                f"{best['form']} shared_by={', '.join(sorted(normalized_key_to_entities[key]))}",
             )
-        forms_rows.append(_release_form_row(best))
     forms_rows.sort(key=lambda row: row["form_id"])
 
     forms_by_name: dict[str, list[dict[str, str]]] = defaultdict(list)
@@ -587,7 +604,9 @@ def build_release_rows(source_dir: str | Path | None = None) -> dict[str, list[d
 
     alias_candidates: list[dict[str, str]] = []
     for row in forms_rows:
-        if row["identity_status"] == "canonical":
+        # Ambiguous candidates belong to several identities and must never be
+        # published as a single-identity alias.
+        if row["identity_status"] in {"canonical", "ambiguous_candidate"}:
             continue
         identity = identity_by_id[row["name_id"]]
         canonical_values = {
@@ -686,7 +705,7 @@ def validate_release(data_dir: str | Path | None = None) -> list[str]:
     if len(form_ids) != len(forms):
         errors.append("duplicate form_id values in forms.csv")
 
-    exact_form_to_names: dict[tuple[str, str, str], set[str]] = defaultdict(set)
+    normalized_rows: dict[str, list[dict[str, str]]] = defaultdict(list)
     name_to_auto_forms: dict[str, set[str]] = defaultdict(set)
     for row in forms:
         form = row["form"]
@@ -717,13 +736,32 @@ def validate_release(data_dir: str | Path | None = None) -> list[str]:
             }
         ):
             errors.append(f"form {row['form_id']} leaked generated formation into release: {form!r}")
-        exact_form_to_names[(row["form"], row["script"], row["language_tag"])].add(name_id)
+        normalized_rows[normalize.safe(form)].append(row)
         if row["merge_policy"] == "auto_merge":
             name_to_auto_forms[name_id].add(row["form_id"])
 
-    for key, ids in exact_form_to_names.items():
-        if len(ids) > 1:
-            errors.append(f"exact release form {key!r} maps to multiple names: {', '.join(sorted(ids))}")
+    # ADR-002/ADR-005 (TN-15): sharing is judged at the resolver's own key
+    # level (normalize.safe(form)); a shared spelling is a legitimate
+    # multi-candidate state, but only when every row under the key says so.
+    for key, rows in normalized_rows.items():
+        ids = {row["name_id"] for row in rows}
+        if len(ids) <= 1:
+            for row in rows:
+                if row["identity_status"] == "ambiguous_candidate":
+                    errors.append(
+                        f"form {row['form_id']} is ambiguous_candidate but its spelling maps to a single name"
+                    )
+            continue
+        offenders = [
+            row["form_id"]
+            for row in rows
+            if row["identity_status"] != "ambiguous_candidate" or row["merge_policy"] != "review_required"
+        ]
+        if offenders:
+            errors.append(
+                f"shared release form {key!r} maps to multiple names ({', '.join(sorted(ids))}); "
+                f"rows {', '.join(offenders)} must be ambiguous_candidate with merge_policy review_required"
+            )
 
     missing_auto_forms = [name_id for name_id in sorted(name_ids) if not name_to_auto_forms.get(name_id)]
     if missing_auto_forms:
@@ -791,6 +829,10 @@ def validate_release(data_dir: str | Path | None = None) -> list[str]:
         name_id = row["name_id"]
         if row["form_id"] not in form_ids:
             errors.append(f"alias {row['alias_id']} references unknown form_id {row['form_id']}")
+        elif form_by_id[row["form_id"]]["identity_status"] == "ambiguous_candidate":
+            errors.append(
+                f"alias {row['alias_id']} references ambiguous_candidate form {row['form_id']}"
+            )
         if name_id not in name_ids:
             errors.append(f"alias {row['alias_id']} references unknown name_id {name_id}")
         if row["merge_policy"] not in VALID_MERGE_POLICIES:
